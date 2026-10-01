@@ -6,8 +6,9 @@ rules and wins where they differ.
 This is a dormant copy-from catalog. Maintain it only for explicitly requested
 work. `standards.manifest.toml` owns the profile inventory and fixture mapping.
 `shared/`, `Mise/`, `Dagger/`, and language folders are copyable templates.
-Markdown and Shell also support repository checks. Shared tooling is an
-independent snapshot; each catalog owns its changes.
+Root Markdown and Shell tooling supports repository checks, without language
+templates or fixtures. Shared tooling is an independent snapshot; each catalog
+owns its changes.
 
 ## Editing
 

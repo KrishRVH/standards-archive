@@ -193,26 +193,6 @@ task_fragment = "20-lua.toml"
 mirror = [".luacheckrc", ".luarc.json", "stylua.toml"]
 dagger = true
 
-[profiles.markdown]
-name = "Markdown/MDX"
-template = "Markdown"
-tester = "testers/markdown"
-task_prefix = "md"
-task_fragment = "20-markdown.toml"
-mirror = [
-  ".markdownlint-cli2.jsonc",
-  ".prettierignore",
-  "content/example.mdx",
-  "docs/example.md",
-  "lychee.toml",
-  "package.json",
-  "prettier.config.mjs",
-  "scripts/check-mdx.mjs",
-  "scripts/check-mdx.test.mjs",
-  "typos.toml",
-]
-required_tester_files = ["bun.lock"]
-
 [profiles.odin]
 name = "Odin"
 template = "Odin"
@@ -243,22 +223,6 @@ tester = "testers/roc"
 task_prefix = "roc"
 task_fragment = "20-roc.toml"
 mirror = ["Project.roc", "main.roc", "scripts/format.sh"]
-
-[profiles.shell]
-name = "Shell"
-template = "Shell"
-tester = "testers/shell"
-task_prefix = "shell"
-task_fragment = "20-shell.toml"
-mirror = [
-  ".editorconfig",
-  ".shellcheckrc",
-  "AGENTS.md",
-  "README.md",
-  "scripts/project-name.sh",
-  "scripts/shell-standards.sh",
-  "tests/project-name.bats",
-]
 
 [profiles.spark]
 name = "SPARK (Ada)"

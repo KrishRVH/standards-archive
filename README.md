@@ -9,8 +9,9 @@ Markdown/MDX profiles live in
 [standards](https://github.com/KrishRVH/standards).
 
 This repository owns a self-contained snapshot of `shared/`, `Mise/`, and
-`Dagger/`. Markdown and Shell templates and fixtures support its own repository
-checks. The two catalogs have no runtime dependency or synchronization process.
+`Dagger/`. Root Markdown and Shell tooling checks this repository's own
+documentation and scripts. The two catalogs have no runtime dependency or
+synchronization process.
 Tool and dependency pins remain fixed until an explicitly requested update;
 preserved fixtures do not promise compatibility with future tool releases.
 

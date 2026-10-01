@@ -97,12 +97,11 @@ constrain tools from a developer's global mise configuration.
 Language task files are additive. Keep only the `conf.d/20-*.toml` files that
 match the project languages; the aggregate `fmt`, `fmt:check`, `lint`, `test`,
 `standards`, and `standards:check` tasks dispatch to C, C++, Elixir,
-Fortran, GDScript, Haskell, JavaScript, Lua, Markdown/MDX, Odin, PHP, Roc,
-Shell, SPARK/Ada, and Zig when their project files are detected. Roc dispatch
-requires `main.roc`; Odin dispatch requires an owned source file under `src/`
+Fortran, GDScript, Haskell, JavaScript, Lua, Odin, PHP, Roc, SPARK/Ada,
+and Zig when their project files are detected. Roc dispatch requires
+`main.roc`; Odin dispatch requires an owned source file under `src/`
 or `tests/`; GDScript dispatch requires `project.godot` and an owned script
-under `src/` or `tests/`; Markdown/MDX dispatch requires
-`.markdownlint-cli2.jsonc`; JavaScript dispatch requires `package.json` plus
+under `src/` or `tests/`; JavaScript dispatch requires `package.json` plus
 `jsconfig.json`.
 
 Each language fragment expresses static workflow composition with native mise
@@ -124,11 +123,6 @@ The JavaScript task file is Bun-only. If a project uses pnpm, Yarn, or npm,
 replace it with a project-specific task file. The workflow uses Oxfmt for
 formatting, Oxlint for linting, Knip for the declared dependency boundary, and
 `tsc` only for strict `checkJs` analysis.
-
-The Markdown/MDX task file is Bun-backed for Prettier, markdownlint, and MDX
-compiler dependencies. Local link and typo checks use pinned mise tools. The
-default gate runs lychee offline so CI does not depend on external websites;
-use `md:standards:check:deep` for external link checks and package audit.
 
 The Odin task file uses the OLS `odinfmt` nightly for project-scoped developer
 formatting and the version-matched compiler as the style, vet, and test

@@ -31,11 +31,9 @@ AGGREGATE_MARKER_CASES = {
     "haskell": ("project.cabal",),
     "js": ("package.json", "jsconfig.json"),
     "lua": (".luarc.json",),
-    "md": (".markdownlint-cli2.jsonc",),
     "odin": ("src/project_name/project_name.odin",),
     "php": ("composer.json",),
     "roc": ("main.roc",),
-    "shell": (".shellcheckrc",),
     "spark": ("alire.toml", "src/project.ads"),
     "zig": ("build.zig",),
 }
@@ -379,6 +377,8 @@ def check_aggregate_dispatch(profiles: dict[str, dict[str, object]]) -> list[str
                 "godot-without-gdscript": ("project.godot",),
                 "package-without-js-config": ("package.json",),
                 "spark-without-source": ("alire.toml",),
+                "markdown-only": (".markdownlint-cli2.jsonc",),
+                "shell-only": (".shellcheckrc",),
             }.items():
                 commands, stderr, returncode = execute(case, "fmt", markers)
                 if returncode != 0:
@@ -387,9 +387,9 @@ def check_aggregate_dispatch(profiles: dict[str, dict[str, object]]) -> list[str
                     errors.append(f"aggregate negative marker case {case} dispatched {commands!r}")
 
             commands, stderr, returncode = execute(
-                "standards-check-secrets", "standards:check", (".shellcheckrc",)
+                "standards-check-secrets", "standards:check", ("package.json", "jsconfig.json")
             )
-            expected = ["run shell:standards:check"]
+            expected = ["run js:standards:check"]
             if returncode != 0:
                 errors.append(f"aggregate standards:check case failed: {stderr.strip()}")
             elif commands != expected:
@@ -540,7 +540,7 @@ def check_bun_pins(profiles: dict[str, dict[str, object]]) -> list[str]:
         if pin is not None:
             package_json = ROOT / str(profile["template"]) / "package.json"
             errors.extend(package_manager_errors(profile_id, package_json, pin, rel(fragment)))
-    markdown = ROOT / "Mise" / "conf.d" / "20-markdown.toml"
+    markdown = ROOT / ".config" / "mise" / "conf.d" / "20-markdown.toml"
     root_pin = bun_pin(markdown)
     if root_pin is not None:
         errors.extend(package_manager_errors("root", ROOT / "package.json", root_pin, rel(markdown)))
@@ -737,39 +737,6 @@ def check_root_shared_files() -> list[str]:
     for item in ROOT_SHARED_MIRROR:
         errors.extend(compare_file("root", "shared file", ROOT / "shared" / item, ROOT / item))
     errors.extend(compare_file("root", "hygiene task", HYGIENE, ROOT / ".config" / "mise" / "tasks" / "hygiene"))
-    errors.extend(
-        compare_file(
-            "root",
-            "Markdown task fragment",
-            ROOT / "Mise" / "conf.d" / "20-markdown.toml",
-            ROOT / ".config" / "mise" / "conf.d" / "20-markdown.toml",
-        )
-    )
-    for file in ("check-mdx.mjs", "check-mdx.test.mjs"):
-        errors.extend(
-            compare_file(
-                "root",
-                "Markdown checker",
-                ROOT / "Markdown" / "scripts" / file,
-                ROOT / "scripts" / file,
-            )
-        )
-    errors.extend(
-        compare_file(
-            "root",
-            "shell task fragment",
-            ROOT / "Mise" / "conf.d" / "20-shell.toml",
-            ROOT / ".config" / "mise" / "conf.d" / "20-shell.toml",
-        )
-    )
-    errors.extend(
-        compare_file(
-            "root",
-            "shell standards runner",
-            ROOT / "Shell" / "scripts" / "shell-standards.sh",
-            ROOT / "scripts" / "shell-standards.sh",
-        )
-    )
     return errors
 
 

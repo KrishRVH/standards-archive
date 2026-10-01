@@ -62,10 +62,6 @@ if [ -f package.json ] && [ -f jsconfig.json ]; then
   dispatch js
 fi
 
-if [ -f .markdownlint-cli2.jsonc ]; then
-  dispatch md
-fi
-
 if find src tests -type f -name '*.odin' -print -quit 2>/dev/null | grep -q .; then
   dispatch odin
 fi
@@ -104,10 +100,6 @@ fi
 
 if [ -f stylua.toml ] || [ -f .luarc.json ]; then
   dispatch lua
-fi
-
-if [ -f .shellcheckrc ]; then
-  dispatch shell
 fi
 
 if [ "$ran" = 0 ]; then
