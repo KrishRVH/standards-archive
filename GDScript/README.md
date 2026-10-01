@@ -17,8 +17,7 @@ mise installs both tools. The aqua Godot release exposes a `godot` executable
 through `symlink_bins`. GDToolkit comes from the `pypi:` backend: `mise lock`
 records its complete dependency graph with wheel hashes in `mise.lock` and a
 sidecar under `.config/mise/locks/`, and installs it on the pinned Python.
-Graph locking needs mise 2026.9.7 or newer and uv 0.12.10 or newer. In a
-project with an older lockfile, run `mise lock --upgrade` once, then commit
+Graph locking needs mise 2026.9.7 or newer and uv 0.12.10 or newer. Commit
 `mise.lock` and the `locks/` directory. Refresh GDToolkit's dependencies with
 `mise lock --bump pypi:gdtoolkit`.
 

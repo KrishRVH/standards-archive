@@ -20,21 +20,21 @@ configuration and tools. Run one fixture through the same root namespace with,
 for example:
 
 ```sh
-mise run //testers/python:standards:check
+mise run //testers/c:standards:check
 ```
 
 For an isolated check, run one representative fixture in its Dagger reference
 container. This task intentionally sits outside the default root gate:
 
 ```sh
-MISE_TRUSTED_CONFIG_PATHS="$PWD" mise run //testers/python:dagger:standards:check
+MISE_TRUSTED_CONFIG_PATHS="$PWD" mise run //testers/c:dagger:standards:check
 ```
 
 Or run the same host-local gate that the repository aggregate task uses from
 inside one fixture:
 
 ```sh
-cd testers/ts
+cd testers/js
 MISE_TRUSTED_CONFIG_PATHS="$PWD/../.." mise run standards:check
 ```
 

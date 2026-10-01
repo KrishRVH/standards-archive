@@ -7,13 +7,11 @@ lockfile = false
 
 [settings]
 # Sized for the maintainer's 32-thread workstation, where this root gate
-# routinely runs end to end. Fixture tasks stay bounded below by their own
-# tool concurrency settings (for example the TypeScript Stryker workers).
+# runs on demand. Fixture tools also bound their own concurrency.
 jobs = 8
 lockfile = true
 
 [tools]
-actionlint = "1.7.12"
 gitleaks = "8.30.1"
 python = "3.14.7"
 
@@ -25,13 +23,7 @@ run = "gitleaks dir . --redact --no-banner"
 description = "Check standards profile contracts and fixture drift"
 run = [
   "scripts/check-standards-drift.py",
-  "scripts/check-ignore-contracts.py",
-  "scripts/check-profile-governance.mjs",
 ]
-
-[tasks."standards:eslint-prettier:check"]
-description = "Validate the secondary ESLint and Prettier TypeScript profile"
-run = "scripts/check-eslint-prettier-template.sh"
 
 [tasks.standards]
 description = "Run repository standards workflows and available autofixes"
@@ -47,7 +39,6 @@ description = "Run the standards repository CI gate"
 depends = ["secrets", "hygiene"]
 run = [
   { tasks = [
-    "standards:eslint-prettier:check",
     "standards:drift",
     "md:standards:check",
     "shell:standards:check",

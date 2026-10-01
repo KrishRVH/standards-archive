@@ -54,20 +54,12 @@ if [ -f composer.json ]; then
   dispatch php
 fi
 
-if [ -f pyproject.toml ]; then
-  dispatch py
-fi
-
 if [ -f main.roc ]; then
   dispatch roc
 fi
 
 if [ -f package.json ] && [ -f jsconfig.json ]; then
   dispatch js
-fi
-
-if [ -f package.json ] && [ -f tsconfig.json ]; then
-  dispatch ts
 fi
 
 if [ -f .markdownlint-cli2.jsonc ]; then
@@ -78,16 +70,8 @@ if find src tests -type f -name '*.odin' -print -quit 2>/dev/null | grep -q .; t
   dispatch odin
 fi
 
-if [ -f Cargo.toml ]; then
-  dispatch rust
-fi
-
 if [ -f alire.toml ] && find . -maxdepth 4 \\( -name '*.ads' -o -name '*.adb' -o -name '*.gpr' \\) -print -quit | grep -q .; then
   dispatch spark
-fi
-
-if [ -f go.mod ]; then
-  dispatch go
 fi
 
 if [ -f project.godot ] && find src tests -type f -name '*.gd' -print -quit 2>/dev/null | grep -q .; then
@@ -106,10 +90,6 @@ if [ -f fpm.toml ]; then
   dispatch fortran
 fi
 
-if [ -f settings.gradle.kts ] || [ -f build.gradle.kts ]; then
-  dispatch kotlin
-fi
-
 if [ -f build.zig ]; then
   dispatch zig
 fi
@@ -120,10 +100,6 @@ fi
 
 if [ -f CMakeLists.txt ] && find . -maxdepth 4 -name '*.c' -print -quit | grep -q .; then
   dispatch c
-fi
-
-if find . -maxdepth 3 \\( -name '*.sln' -o -name '*.slnx' -o -name '*.csproj' \\) -print -quit | grep -q .; then
-  dispatch csharp
 fi
 
 if [ -f stylua.toml ] || [ -f .luarc.json ]; then

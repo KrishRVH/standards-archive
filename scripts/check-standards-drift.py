@@ -25,24 +25,18 @@ REQUIRED_TASK_SUFFIXES = ("fmt", "fmt:check", "lint", "test", "standards", "stan
 AGGREGATE_MARKER_CASES = {
     "c": ("CMakeLists.txt", "src/main.c"),
     "cpp": ("CMakeLists.txt", "src/library.hpp"),
-    "csharp": ("src/project.csproj",),
     "elixir": ("mix.exs",),
     "fortran": ("fpm.toml",),
-    "go": ("go.mod",),
     "godot": ("project.godot", "src/features/player/state/machine/main.gd"),
     "haskell": ("project.cabal",),
     "js": ("package.json", "jsconfig.json"),
-    "kotlin": ("build.gradle.kts",),
     "lua": (".luarc.json",),
     "md": (".markdownlint-cli2.jsonc",),
     "odin": ("src/project_name/project_name.odin",),
     "php": ("composer.json",),
-    "py": ("pyproject.toml",),
     "roc": ("main.roc",),
-    "rust": ("Cargo.toml",),
     "shell": (".shellcheckrc",),
     "spark": ("alire.toml", "src/project.ads"),
-    "ts": ("package.json", "tsconfig.json"),
     "zig": ("build.zig",),
 }
 DAGGER_MIRROR = ("dagger/package.json", "dagger/tsconfig.json", "dagger/src/index.ts")
@@ -370,7 +364,6 @@ def check_aggregate_dispatch(profiles: dict[str, dict[str, object]]) -> list[str
                 return commands, result.stderr, result.returncode
 
             positive_cases = [(prefix, prefix, markers) for prefix, markers in AGGREGATE_MARKER_CASES.items()]
-            positive_cases.append(("csharp-solution", "csharp", ("project.slnx",)))
             for case, prefix, markers in positive_cases:
                 commands, stderr, returncode = execute(case, "fmt", markers)
                 expected = [f"run {prefix}:fmt"]
@@ -384,7 +377,7 @@ def check_aggregate_dispatch(profiles: dict[str, dict[str, object]]) -> list[str
             for case, markers in {
                 "cmake-without-source": ("CMakeLists.txt",),
                 "godot-without-gdscript": ("project.godot",),
-                "package-without-js-or-ts-config": ("package.json",),
+                "package-without-js-config": ("package.json",),
                 "spark-without-source": ("alire.toml",),
             }.items():
                 commands, stderr, returncode = execute(case, "fmt", markers)
@@ -394,9 +387,9 @@ def check_aggregate_dispatch(profiles: dict[str, dict[str, object]]) -> list[str
                     errors.append(f"aggregate negative marker case {case} dispatched {commands!r}")
 
             commands, stderr, returncode = execute(
-                "standards-check-secrets", "standards:check", ("composer.json",)
+                "standards-check-secrets", "standards:check", (".shellcheckrc",)
             )
-            expected = ["run php:standards:check"]
+            expected = ["run shell:standards:check"]
             if returncode != 0:
                 errors.append(f"aggregate standards:check case failed: {stderr.strip()}")
             elif commands != expected:
@@ -418,9 +411,9 @@ def check_hygiene_task() -> list[str]:
         errors.append(f"{rel(HYGIENE)} must be executable for mise to list it")
     text = HYGIENE.read_text(encoding="utf-8")
     pinned = next((line for line in text.splitlines() if line.startswith("# MISE tools=")), "")
-    python = load_toml(ROOT / "Mise" / "conf.d" / "20-python.toml").get("tools", {}).get("python")
+    python = load_toml(ROOT / ".config" / "mise" / "config.toml").get("tools", {}).get("python")
     if pinned != f'# MISE tools={{python="{python}"}}':
-        errors.append(f"{rel(HYGIENE)} must pin the Python profile's python {python}")
+        errors.append(f"{rel(HYGIENE)} must pin the root python {python}")
 
     try:
         with tempfile.TemporaryDirectory(prefix="standards-hygiene-") as temporary:
@@ -717,7 +710,6 @@ def check_root_mise_config(profiles: dict[str, dict[str, object]]) -> list[str]:
         expected_check_run = [
             {
                 "tasks": [
-                    "standards:eslint-prettier:check",
                     "standards:drift",
                     "md:standards:check",
                     "shell:standards:check",

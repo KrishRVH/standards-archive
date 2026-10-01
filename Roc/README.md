@@ -5,7 +5,7 @@ functional language. It compiles to machine code or WebAssembly, keeps the
 language small, and aims to make static types feel helpful rather than
 ceremonial. The best starting points are the official
 [current documentation](https://www.roc-lang.org/docs/main/) and
-[new-compiler tutorial](https://www.roc-lang.org/tutorial).
+[tutorial](https://www.roc-lang.org/tutorial).
 
 Roc is not ready for a 0.1 release. Its project conventions, tooling, and
 compatibility promises are therefore less settled than those of the other
@@ -65,7 +65,7 @@ mise run roc:test
 mise run roc:standards:check
 ```
 
-The mise profile pins an immutable new-compiler nightly so this repository can
+The mise profile pins an immutable compiler nightly so this repository can
 reproduce its checks. The executable configuration and committed lockfile are
 the source of truth for that operational detail. Formatting, static checks,
 and top-level `expect` tests use the compiler directly, without adding a
@@ -80,8 +80,6 @@ These generic defaults stay out on purpose:
 
 - A floating installer or `latest` URL: it can change without a reviewed
   configuration diff, and an exact immutable tag with digests exists.
-- The `alpha4-rolling` channel or `roc format`: they belong to the old
-  compiler, with different syntax, CLI, and host assets.
 - A headerless Echo app: it is a compiler convenience platform with one output
   operation, not a reusable package boundary.
 - An external platform: I/O requirements are project-specific. Add one when an

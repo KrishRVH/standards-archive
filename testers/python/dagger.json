@@ -1,6 +1,0 @@
-{
-  "name": "project-standards",
-  "sdk": "typescript",
-  "source": "dagger",
-  "include": ["!dagger/.tsbuildinfo", "!dagger/.turbo", "!dagger/dist", "!dagger/node_modules"]
-}

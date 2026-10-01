@@ -1,4 +1,0 @@
-<Project>
-  <!-- Keep file-based verifier apps independent from the parent central
-       package versions and global ReferenceTrimmer dependency. -->
-</Project>

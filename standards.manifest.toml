@@ -78,24 +78,6 @@ mirror = [
 ]
 dagger = true
 
-[profiles.csharp]
-name = "C#"
-template = "C#"
-tester = "testers/csharp"
-task_prefix = "csharp"
-task_fragment = "20-csharp.toml"
-mirror = [
-  ".editorconfig",
-  "BannedSymbols.txt",
-  "Directory.Build.props",
-  "Directory.Packages.props",
-  "global.json",
-  "scripts/Directory.Build.props",
-  "scripts/Directory.Packages.props",
-  "scripts/verify-standards.cs",
-  "stryker-config.json",
-]
-
 [profiles.cpp]
 name = "C++"
 template = "C++"
@@ -164,15 +146,6 @@ mirror = [
   "tests/run_tests.gd.uid",
 ]
 
-[profiles.go]
-name = "Go"
-template = "Go"
-tester = "testers/go"
-task_prefix = "go"
-task_fragment = "20-go.toml"
-mirror = [".golangci.yml", "AGENTS.md", "README.md", "go.mod"]
-required_tester_files = ["tests/format_tasks_test.go"]
-
 [profiles.haskell]
 name = "Haskell"
 template = "Haskell"
@@ -210,15 +183,6 @@ mirror = [
 ]
 shared_mirror = [".gitignore"]
 required_tester_files = ["bun.lock"]
-
-[profiles.kotlin]
-name = "Kotlin"
-template = "Kotlin"
-tester = "testers/kotlin"
-task_prefix = "kotlin"
-task_fragment = "20-kotlin.toml"
-mirror = [".editorconfig", "build.gradle.kts", "detekt.yml", "gradle.properties", "settings.gradle.kts"]
-required_tester_files = ["gradle.lockfile", "gradle/verification-metadata.xml"]
 
 [profiles.lua]
 name = "Lua"
@@ -272,21 +236,6 @@ task_fragment = "20-php.toml"
 mirror = ["composer.json", "phpcs.xml", "phpmd.xml", "phpstan.neon", "phpunit.xml", "rector.php"]
 dagger = true
 
-[profiles.python]
-name = "Python"
-template = "Python"
-tester = "testers/python"
-task_prefix = "py"
-task_fragment = "20-python.toml"
-mirror = [
-  "pyproject.toml",
-  "scripts/check-interrogate-report.py",
-  "scripts/check-mutation-score.py",
-  "scripts/check-suppressions.py",
-  "scripts/run-mutation-transaction.py",
-]
-dagger = true
-
 [profiles.roc]
 name = "Roc"
 template = "Roc"
@@ -294,25 +243,6 @@ tester = "testers/roc"
 task_prefix = "roc"
 task_fragment = "20-roc.toml"
 mirror = ["Project.roc", "main.roc", "scripts/format.sh"]
-
-[profiles.rust]
-name = "Rust"
-template = "Rust"
-tester = "testers/rust"
-task_prefix = "rust"
-task_fragment = "20-rust.toml"
-mirror = [
-  "Cargo.toml",
-  "clippy.toml",
-  "deny.toml",
-  "policy-fixtures/disallowed-mutex.rs",
-  "rust-toolchain.toml",
-  "rustfmt.toml",
-  "scripts/mutants-lock.sh",
-  "scripts/verify-mutants.sh",
-  "tests/allow_policy.rs",
-  "tests/mutation_report_policy.rs",
-]
 
 [profiles.shell]
 name = "Shell"
@@ -347,122 +277,6 @@ mirror = [
   "tests/project_name_tests.adb",
 ]
 required_tester_files = ["alire/alire.lock"]
-
-[profiles.ts]
-name = "TypeScript"
-template = "TS"
-tester = "testers/ts"
-task_prefix = "ts"
-task_fragment = "20-ts.toml"
-mirror = [
-  ".github/CODEOWNERS",
-  ".github/pull_request_template.md",
-  ".github/workflows/quality.yml",
-  ".oxfmtrc.json",
-  ".oxlintrc.json",
-  ".prettierignore",
-  "AGENTS.md",
-  "README.md",
-  "bun.lock",
-  "bunfig.toml",
-  "docs/effect/adoption-and-functions.md",
-  "docs/effect/concurrency-and-resources.md",
-  "docs/effect/diagnostic-inventory.md",
-  "docs/effect/enforcement.md",
-  "docs/effect/errors-cause-and-projection.md",
-  "docs/effect/overlays/bun-server.md",
-  "docs/effect/overlays/framework-ui.md",
-  "docs/effect/overlays/production-observability.md",
-  "docs/effect/overlays/published-library.md",
-  "docs/effect/schema-config-and-security.md",
-  "docs/effect/services-layers-and-runtime.md",
-  "docs/effect/testing-and-diagnostics.md",
-  "docs/effect/time-retry-and-cancellation.md",
-  "docs/effect/type-discipline.md",
-  "effect-diagnostics/fixtures/any-unknown-error-context.ts",
-  "effect-diagnostics/fixtures/class-self-mismatch.ts",
-  "effect-diagnostics/fixtures/crypto-random-uuid-in-effect.ts",
-  "effect-diagnostics/fixtures/effect-fn-implicit-any.ts",
-  "effect-diagnostics/fixtures/effect-gen-adapter.ts",
-  "effect-diagnostics/fixtures/effect-in-failure.ts",
-  "effect-diagnostics/fixtures/effect-in-void-success.ts",
-  "effect-diagnostics/fixtures/floating-effect.ts",
-  "effect-diagnostics/fixtures/generic-effect-service.ts",
-  "effect-diagnostics/fixtures/global-date-in-effect.ts",
-  "effect-diagnostics/fixtures/global-random-in-effect.ts",
-  "effect-diagnostics/fixtures/global-timers-in-effect.ts",
-  "effect-diagnostics/fixtures/layer-merge-all-dependencies.ts",
-  "effect-diagnostics/fixtures/lazy-promise-in-sync.ts",
-  "effect-diagnostics/fixtures/missing-effect-context.ts",
-  "effect-diagnostics/fixtures/missing-effect-error.ts",
-  "effect-diagnostics/fixtures/missing-layer-context.ts",
-  "effect-diagnostics/fixtures/missing-return-yield-star.ts",
-  "effect-diagnostics/fixtures/missing-star-in-yield.ts",
-  "effect-diagnostics/fixtures/multiple-effect-provide.ts",
-  "effect-diagnostics/fixtures/outdated-api.ts",
-  "effect-diagnostics/fixtures/overridden-schema-constructor.ts",
-  "effect-diagnostics/fixtures/process-env-in-effect.ts",
-  "effect-diagnostics/fixtures/return-effect-in-gen.ts",
-  "effect-diagnostics/fixtures/run-effect-inside-effect.ts",
-  "effect-diagnostics/fixtures/unknown-in-effect-catch.ts",
-  "effect-diagnostics/fixtures/unsafe-effect-type-assertion.ts",
-  "effect-diagnostics/fixtures/unused-next-line-suppression.ts",
-  "effect-diagnostics/tsconfig.json",
-  "eslint.config.mjs",
-  "knip.jsonc",
-  "package.json",
-  "prettier.config.mjs",
-  "scripts/check-directives.mjs",
-  "scripts/check-effect-diagnostics.mjs",
-  "scripts/check-stryker-cache.mjs",
-  "scripts/check-stryker-report.mjs",
-  "scripts/check-type-tests.mjs",
-  "scripts/eslint-local-rules.mjs",
-  "scripts/run-stryker.mjs",
-  "scripts/stryker-report-contract.mjs",
-  "src/endpoint-checker.ts",
-  "src/endpoint-contracts.ts",
-  "src/endpoint-policy.ts",
-  "src/main.ts",
-  "stryker.config.mjs",
-  "tests/endpoint-checker.test.ts",
-  "tests/endpoint-contracts.test.ts",
-  "tests/endpoint-properties.test.ts",
-  "tests/support/test-clock.ts",
-  "tsconfig.json",
-  "type-tests/nonexhaustive-variant.ts",
-  "type-tests/protected-route-unprojected.ts",
-  "type-tests/tsconfig.json",
-  "types/text-decoder-options.d.ts",
-]
-required_tester_files = [
-  "tests/agent-documentation.test.ts",
-  "tests/effect-application-tasks.test.ts",
-  "tests/effect-async-retry.test.ts",
-  "tests/effect-bun-fetch-redirect.test.ts",
-  "tests/effect-bun-runtime.test.ts",
-  "tests/effect-client-api-boundary.test.ts",
-  "tests/effect-component-lint-contract.test.ts",
-  "tests/effect-concurrency-observation.test.ts",
-  "tests/effect-config-schema.test.ts",
-  "tests/effect-failure-observation.test.ts",
-  "tests/effect-publication-controller.test.ts",
-  "tests/effect-request-body.test.ts",
-  "tests/effect-resources-runtime.test.ts",
-  "tests/fixtures/bun-runtime-signal-child.ts",
-  "tests/quality-workflow.test.ts",
-  "tests/state-wall-contract.test.ts",
-  "tests/support/application-task-service.ts",
-  "tests/support/bounded-body-reader.ts",
-  "tests/support/client-api-boundary.ts",
-  "tests/support/failure-observation.ts",
-  "tests/support/operation-controller.ts",
-  "tests/support/oxlint-probe.ts",
-  "tests/support/runtime-lease.ts",
-  "tests/support/workflow-contract.ts",
-  "tests/tooling-policy.test.ts",
-]
-dagger = true
 
 [profiles.zig]
 name = "Zig"

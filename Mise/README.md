@@ -19,11 +19,9 @@ specific invocation needs the project's pinned tool or environment and no
 suitable task exists. Final verification uses the project's mise gates.
 
 `mise run` supplies its own tool environment. Interactive activation and shims
-are optional choices for automatic tool selection. The WSL bootstrap enables
-cached interactive activation with shims disabled; macOS keeps native runtime
-paths without activation. Prompt, history, navigation, and completion tools run
-directly. See the [workstation guide](../extras/workstation/README.md) for shell
-defaults and latency checks.
+are optional choices for automatic tool selection. Prompt, history,
+navigation, and completion tools follow host conventions and run independently
+of mise.
 
 The command surface starts strict. Keep the language tasks that fit the project
 and relax or remove checks that do not match its risk, lifecycle, or team
@@ -98,15 +96,14 @@ constrain tools from a developer's global mise configuration.
 
 Language task files are additive. Keep only the `conf.d/20-*.toml` files that
 match the project languages; the aggregate `fmt`, `fmt:check`, `lint`, `test`,
-`standards`, and `standards:check` tasks dispatch to C, C#, C++, Elixir,
-Fortran, GDScript, Go, Haskell, JavaScript, Kotlin, Lua, Markdown/MDX, Odin,
-PHP, Python, Roc, Rust, Shell, SPARK/Ada, TypeScript, and Zig when
-their project files are detected. Roc dispatch requires `main.roc`; Odin
-dispatch requires an owned source file under `src/` or `tests/`; GDScript
-dispatch requires `project.godot` and an owned script under `src/` or `tests/`;
-Markdown/MDX dispatch requires `.markdownlint-cli2.jsonc`; JavaScript and
-TypeScript dispatch require `package.json` plus `jsconfig.json` or
-`tsconfig.json`, respectively.
+`standards`, and `standards:check` tasks dispatch to C, C++, Elixir,
+Fortran, GDScript, Haskell, JavaScript, Lua, Markdown/MDX, Odin, PHP, Roc,
+Shell, SPARK/Ada, and Zig when their project files are detected. Roc dispatch
+requires `main.roc`; Odin dispatch requires an owned source file under `src/`
+or `tests/`; GDScript dispatch requires `project.godot` and an owned script
+under `src/` or `tests/`; Markdown/MDX dispatch requires
+`.markdownlint-cli2.jsonc`; JavaScript dispatch requires `package.json` plus
+`jsconfig.json`.
 
 Each language fragment expresses static workflow composition with native mise
 dependencies and structured task references. Shared install, restore,
@@ -123,28 +120,15 @@ generic aggregate tasks with explicit native dependencies. The dispatcher is a
 POSIX shell template verified on Linux; Windows consumers need explicit task
 relationships or a reviewed `run_windows` implementation.
 
-The JavaScript and TypeScript task files are intentionally Bun-only. If a
-project uses pnpm, Yarn, or npm, replace the matching task file with a
-project-specific one instead of keeping multiple unpinned package-manager
-branches in the shared standard. The JavaScript workflow uses Oxfmt for
+The JavaScript task file is Bun-only. If a project uses pnpm, Yarn, or npm,
+replace it with a project-specific task file. The workflow uses Oxfmt for
 formatting, Oxlint for linting, Knip for the declared dependency boundary, and
-`tsc` only for strict `checkJs` analysis. The TypeScript workflow exposes
-separate Effect diagnostics and agent-oriented overview tasks.
+`tsc` only for strict `checkJs` analysis.
 
 The Markdown/MDX task file is Bun-backed for Prettier, markdownlint, and MDX
 compiler dependencies. Local link and typo checks use pinned mise tools. The
 default gate runs lychee offline so CI does not depend on external websites;
 use `md:standards:check:deep` for external link checks and package audit.
-
-The C# template enables locked package restore in project MSBuild properties:
-package locks are created by default, and CI restore runs in locked mode. Lint
-and test run Release builds with analyzer warnings promoted to failures.
-
-The Rust task file reads the compiler pin from `rust-toolchain.toml`, runs every
-Cargo command in workspace and locked modes, builds docs with rustdoc warnings
-denied, and runs the tests with cargo-nextest plus the doctests. Its
-`[tools]` pin cargo-deny through aqua and cargo-machete, cargo-nextest, and
-cargo-mutants through their GitHub release binaries.
 
 The Odin task file uses the OLS `odinfmt` nightly for project-scoped developer
 formatting and the version-matched compiler as the style, vet, and test
@@ -159,7 +143,7 @@ Xcode command-line tools, and Windows requires MSVC and the Windows SDK; this
 repository does not verify those hosts or FreeBSD. The formatter adapter
 requires a POSIX shell.
 
-The Roc task file pins the immutable new-compiler release selected by Roc's
+The Roc task file pins the immutable compiler release selected by Roc's
 official installers and resolves its official release digests into the mise
 lock. Native `roc fmt`, warning-failing `roc check`, and top-level `expect`
 tests form the generic gate. The fixture is verified on Linux x64; the declared
