@@ -1,0 +1,12 @@
+min_version = "2026.6.12"
+
+[settings]
+lockfile = true
+
+[tasks.standards]
+description = "Run the Mojo tester standards workflow"
+depends = ["mojo:standards"]
+
+[tasks."standards:check"]
+description = "Run the Mojo tester standards CI gate"
+depends = ["mojo:standards:check"]

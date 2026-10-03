@@ -1,0 +1,66 @@
+# The pypi backend locks the mojo wheel graph by digest in a revision 3
+# mise.lock, which mise 2026.9.16 added.
+min_version = "2026.9.16"
+
+[env]
+# Skip Modular's telemetry upload, which calls the network.
+MODULAR_TELEMETRY_ENABLED = "0"
+
+[tools]
+python = "3.14.7"
+uv = "0.12.19"
+# The `mojo` executable ships in the mojo-compiler wheel. The click pin only
+# raises the graph lock's Python floor to 3.10: mblack declares no
+# requires-python, but its pathspec and click releases need 3.9 and 3.10.
+"pypi:mojo" = { version = "1.1.0", expose = ["mojo-compiler==1.1.0"], with = ["click==8.5.0"] }
+
+[tasks."mojo:fmt"]
+description = "Format Mojo source"
+run = "scripts/format.sh write"
+
+[tasks."mojo:fmt:check"]
+description = "Check Mojo formatting"
+run = "scripts/format.sh check"
+
+[tasks."mojo:lint"]
+description = "Compile every Mojo package under src with warnings as errors"
+run = '''
+set -eu
+out="$(mktemp -d)"
+trap 'rm -rf "$out"' EXIT
+found=0
+for init in src/*/__init__.mojo; do
+  [ -e "$init" ] || continue
+  found=1
+  package="$(dirname "$init")"
+  mojo precompile --Werror "$package" -o "$out/$(basename "$package").mojoc"
+done
+if [ "$found" -eq 0 ]; then
+  echo "mojo:lint found no src/*/__init__.mojo package" >&2
+  exit 1
+fi
+'''
+
+[tasks."mojo:test"]
+description = "Run every tests/test_*.mojo suite with warnings as errors"
+run = '''
+set -eu
+found=0
+for suite in tests/test_*.mojo; do
+  [ -e "$suite" ] || continue
+  found=1
+  mojo run --Werror -I src "$suite"
+done
+if [ "$found" -eq 0 ]; then
+  echo "mojo:test found no tests/test_*.mojo suites" >&2
+  exit 1
+fi
+'''
+
+[tasks."mojo:standards"]
+description = "Run the Mojo standards workflow with autofixes"
+depends = ["mojo:fmt"]
+
+[tasks."mojo:standards:check"]
+description = "Run the Mojo standards CI gate"
+depends = ["mojo:fmt:check", "mojo:lint", "mojo:test"]

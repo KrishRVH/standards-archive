@@ -78,6 +78,10 @@ if find src tests -type f -name '*.vx' -print -quit 2>/dev/null | grep -q .; the
   dispatch vx
 fi
 
+if find src tests -type f \\( -name '*.mojo' -o -name '*.🔥' \\) -print -quit 2>/dev/null | grep -q .; then
+  dispatch mojo
+fi
+
 if [ -f alire.toml ] && find . -maxdepth 4 \\( -name '*.ads' -o -name '*.adb' -o -name '*.gpr' \\) -print -quit | grep -q .; then
   dispatch spark
 fi

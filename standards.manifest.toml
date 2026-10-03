@@ -201,6 +201,18 @@ task_fragment = "20-lua.toml"
 mirror = [".luacheckrc", ".luarc.json", "stylua.toml"]
 dagger = true
 
+[profiles.mojo]
+name = "Mojo"
+template = "Mojo"
+tester = "testers/mojo"
+task_prefix = "mojo"
+task_fragment = "20-mojo.toml"
+mirror = [
+  "scripts/format.sh",
+  "src/project_name/__init__.mojo",
+  "tests/test_project_name.mojo",
+]
+
 [profiles.odin]
 name = "Odin"
 template = "Odin"

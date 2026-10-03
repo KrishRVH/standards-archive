@@ -97,13 +97,13 @@ constrain tools from a developer's global mise configuration.
 Language task files are additive. Keep only the `conf.d/20-*.toml` files that
 match the project languages; the aggregate `fmt`, `fmt:check`, `lint`, `test`,
 `standards`, and `standards:check` tasks dispatch to Bend, C, C++, Elixir,
-Fortran, GDScript, Haskell, JavaScript, Lua, Odin, PHP, Roc, SPARK/Ada, Vx,
-Zero, and Zig when their project files are detected. Roc dispatch requires
+Fortran, GDScript, Haskell, JavaScript, Lua, Mojo, Odin, PHP, Roc, SPARK/Ada,
+Vx, Zero, and Zig when their project files are detected. Roc dispatch requires
 `main.roc`; Bend dispatch requires `PROOF.bend`; Zero dispatch requires
-`zero.toml`; Odin and Vx dispatch require an owned source file under `src/` or
-`tests/`; GDScript dispatch requires `project.godot` and an owned script under
-`src/` or `tests/`; JavaScript dispatch requires `package.json` plus
-`jsconfig.json`.
+`zero.toml`; Odin, Mojo, and Vx dispatch require an owned source file under
+`src/` or `tests/`; GDScript dispatch requires `project.godot` and an owned
+script under `src/` or `tests/`; JavaScript dispatch requires `package.json`
+plus `jsconfig.json`.
 
 Each language fragment expresses static workflow composition with native mise
 dependencies and structured task references. Shared install, restore,
@@ -149,6 +149,13 @@ The Bend task file pins an exact release by GitHub digest for Linux and
 macOS. Bend has no formatter, so `fmt` and `fmt:check` run the compiler check;
 `bend:lint` checks the package and `bend:test` checks every law through
 `PROOF.bend`, with `BEND_NO_TELEMETRY` set.
+
+The Mojo task file pins the official `mojo` PyPI wheel through mise's `pypi`
+backend, which locks the compiler, formatter, and debugger wheel graph by
+digest. `mojo format` is checked through a staged copy, `mojo:lint`
+precompiles each `src` package with `--Werror`, and `mojo:test` runs each
+`tests/test_*.mojo` suite with `--Werror`, with `MODULAR_TELEMETRY_ENABLED=0`.
+The toolchain is about 680 MB; the fixture is verified on Linux x64 only.
 
 The Vx task file pins the compiler release, conda-forge LLVM 22 MLIR tools,
 and z3. Native `vx-format` is checked through a staged copy, `vxc` type,
