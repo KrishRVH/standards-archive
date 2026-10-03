@@ -33,6 +33,7 @@ AGGREGATE_MARKER_CASES = {
     "js": ("package.json", "jsconfig.json"),
     "lua": (".luarc.json",),
     "mojo": ("src/project_name/__init__.mojo",),
+    "moonbit": ("moon.mod",),
     "odin": ("src/project_name/project_name.odin",),
     "php": ("composer.json",),
     "roc": ("main.roc",),

@@ -68,7 +68,7 @@ CODE = {
     ".cc", ".cpp", ".cxx", ".hh", ".hpp", ".cs", ".java", ".kt", ".kts", ".zig", ".odin",
     ".swift", ".php", ".dart", ".js", ".mjs", ".cjs", ".jsx", ".ts", ".tsx", ".lua", ".hs",
     ".f90", ".ads", ".adb", ".roc", ".sql",
-    ".bend", ".vx", ".0", ".mojo", ".🔥",
+    ".bend", ".vx", ".0", ".mojo", ".🔥", ".mbt",
 }  # fmt: skip
 DOCS = {".md", ".mdx", ".rst", ".adoc"}
 TOOLING_DIRECTORIES = (".config/", ".github/", "scripts/", "tools/", "ci/")

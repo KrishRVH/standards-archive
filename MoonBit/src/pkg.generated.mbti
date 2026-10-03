@@ -1,0 +1,19 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "owner/project_name"
+
+// Values
+
+// Errors
+
+// Types and methods
+pub struct Counter {
+  value : Int
+}
+pub fn Counter::decrement(Self) -> Self?
+pub fn Counter::increment(Self) -> Self
+pub fn Counter::new() -> Self
+pub fn Counter::value(Self) -> Int
+
+// Type aliases
+
+// Traits

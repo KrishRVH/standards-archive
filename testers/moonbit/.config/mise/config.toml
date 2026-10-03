@@ -1,0 +1,12 @@
+min_version = "2026.6.12"
+
+[settings]
+lockfile = true
+
+[tasks.standards]
+description = "Run the MoonBit tester standards workflow"
+depends = ["moonbit:standards"]
+
+[tasks."standards:check"]
+description = "Run the MoonBit tester standards CI gate"
+depends = ["moonbit:standards:check"]

@@ -213,6 +213,21 @@ mirror = [
   "tests/test_project_name.mojo",
 ]
 
+[profiles.moonbit]
+name = "MoonBit"
+template = "MoonBit"
+tester = "testers/moonbit"
+task_prefix = "moonbit"
+task_fragment = "20-moonbit.toml"
+mirror = [
+  "moon.mod",
+  "scripts/interface.sh",
+  "src/counter.mbt",
+  "src/counter_test.mbt",
+  "src/moon.pkg",
+  "src/pkg.generated.mbti",
+]
+
 [profiles.odin]
 name = "Odin"
 template = "Odin"

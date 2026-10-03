@@ -129,8 +129,10 @@ rebar3.crashdump
 
 # Fortran
 *.mod
-# Go's module file shares Fortran's extension; re-include it after *.mod.
+# Go's and MoonBit's module files share Fortran's extension; re-include
+# them after *.mod.
 !go.mod
+!moon.mod
 *.smod
 
 # Go
@@ -217,6 +219,9 @@ __pycache__/
 **/mutants.out/
 **/mutants.out.old/
 **/*.rs.bk
+
+# MoonBit
+/.mooncakes/
 
 # Zero
 /.zero/

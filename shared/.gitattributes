@@ -63,6 +63,8 @@
 *.mts text
 *.bend text
 *.lua text
+*.mbt text
+*.mbti text
 *.mojo text
 *.🔥 text
 *.odin text
