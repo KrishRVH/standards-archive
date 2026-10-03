@@ -86,6 +86,10 @@ if [ -f moon.mod ] || [ -f moon.mod.json ]; then
   dispatch moonbit
 fi
 
+if [ -f Project.toml ] && find src -maxdepth 1 -name '*.jl' -print -quit 2>/dev/null | grep -q .; then
+  dispatch julia
+fi
+
 if [ -f alire.toml ] && find . -maxdepth 4 \\( -name '*.ads' -o -name '*.adb' -o -name '*.gpr' \\) -print -quit | grep -q .; then
   dispatch spark
 fi

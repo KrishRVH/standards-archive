@@ -58,6 +58,7 @@
 *.cts text
 *.mts text
 *.bend text
+*.jl text
 *.lua text
 *.mbt text
 *.mbti text

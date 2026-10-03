@@ -97,10 +97,11 @@ constrain tools from a developer's global mise configuration.
 Language task files are additive. Keep only the `conf.d/20-*.toml` files that
 match the project languages; the aggregate `fmt`, `fmt:check`, `lint`, `test`,
 `standards`, and `standards:check` tasks dispatch to Bend, C, C++, Elixir,
-Fortran, GDScript, Haskell, JavaScript, Lua, Mojo, MoonBit, Odin, PHP, Roc,
-SPARK/Ada, Vx, Zero, and Zig when their project files are detected. Roc dispatch
-requires `main.roc`; Bend dispatch requires `PROOF.bend`; Zero dispatch requires
-`zero.toml`; MoonBit dispatch requires `moon.mod` or `moon.mod.json`; Odin,
+Fortran, GDScript, Haskell, JavaScript, Julia, Lua, Mojo, MoonBit, Odin, PHP,
+Roc, SPARK/Ada, Vx, Zero, and Zig when their project files are detected. Roc
+dispatch requires `main.roc`; Bend dispatch requires `PROOF.bend`; Zero dispatch
+requires `zero.toml`; MoonBit dispatch requires `moon.mod` or `moon.mod.json`;
+Julia dispatch requires `Project.toml` plus a `.jl` file under `src/`; Odin,
 Mojo, and Vx dispatch require an owned source file under `src/` or `tests/`;
 GDScript dispatch requires `project.godot` and an owned script under `src/` or
 `tests/`; JavaScript dispatch requires `package.json` plus `jsconfig.json`.
@@ -149,6 +150,12 @@ The Bend task file pins an exact release by GitHub digest for Linux and
 macOS. Bend has no formatter, so `fmt` and `fmt:check` run the compiler check;
 `bend:lint` checks the package and `bend:test` checks every law through
 `PROOF.bend`, with `BEND_NO_TELEMETRY` set.
+
+The Julia task file pins an exact official release by SHA-256 and keeps a
+project-local depot in `.julia/`, so packages and precompile caches never touch
+`~/.julia`. One workspace `Manifest.toml` pins the package, its tests, and its
+tools; `julia:install` fails on a stale manifest, Runic owns formatting, and
+`julia:lint` runs Aqua and JET apart from `Pkg.test`.
 
 The Mojo task file pins the official `mojo` PyPI wheel through mise's `pypi`
 backend, which locks the compiler, formatter, and debugger wheel graph by

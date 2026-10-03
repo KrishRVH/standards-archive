@@ -1,0 +1,52 @@
+[env]
+# Keep packages, registries, and precompile caches in the project. The trailing
+# empty entry appends only the bundled stdlib depots, never ~/.julia.
+JULIA_DEPOT_PATH = "{{config_root}}/.julia:"
+
+[tools."http:julia"]
+version = "1.13.1"
+bin_path = "bin"
+strip_components = 1
+
+[tools."http:julia".platforms]
+linux-arm64 = { url = "https://julialang-s3.julialang.org/bin/linux/aarch64/1.13/julia-1.13.1-linux-aarch64.tar.gz", checksum = "sha256:78341862e24734ea1c2fa8795183c52627c23a99aba5aa1d0ec840edecec5ce0" }
+linux-x64 = { url = "https://julialang-s3.julialang.org/bin/linux/x64/1.13/julia-1.13.1-linux-x86_64.tar.gz", checksum = "sha256:0f2e18c8dea60a2c8711d089cd9612f7a8df394b89e5208096fe5867647e0908" }
+macos-arm64 = { url = "https://julialang-s3.julialang.org/bin/mac/aarch64/1.13/julia-1.13.1-macaarch64.tar.gz", checksum = "sha256:a3e0259d4777c2b776c2cba134d5b6c6c124048dcb913f8881517892c49a0f7f" }
+macos-x64 = { url = "https://julialang-s3.julialang.org/bin/mac/x64/1.13/julia-1.13.1-mac64.tar.gz", checksum = "sha256:3e1930346b14443d9b7a63a0290158c030364efcfc352c9c01e9ddd64f03307d" }
+windows-x64 = { url = "https://julialang-s3.julialang.org/bin/winnt/x64/1.13/julia-1.13.1-win64.tar.gz", checksum = "sha256:06d950b97fc99b518d11b0f53c0172bdb762a9309c8bfc8210e50cb47c83af22" }
+
+[tasks."julia:install"]
+description = "Install the packages pinned by the workspace Manifest.toml"
+run = '''julia --project=. -e 'using Pkg; Pkg.is_manifest_current(".") === true || error("Manifest.toml is stale; run mise run julia:update"); Pkg.instantiate(workspace = true, julia_version_strict = true)' '''
+
+[tasks."julia:update"]
+description = "Re-resolve and upgrade the workspace Manifest.toml"
+run = "julia --project=. -e 'using Pkg; Pkg.update()'"
+
+[tasks."julia:fmt"]
+description = "Format Julia source with Runic"
+depends = ["julia:install"]
+run = "scripts/format.sh write"
+
+[tasks."julia:fmt:check"]
+description = "Check Julia formatting with Runic"
+depends = ["julia:install"]
+run = "scripts/format.sh check"
+
+[tasks."julia:lint"]
+description = "Run Aqua package checks and JET static analysis"
+depends = ["julia:install"]
+run = "julia --project=tools --depwarn=error tools/lint.jl"
+
+[tasks."julia:test"]
+description = "Run the package test suite"
+depends = ["julia:install"]
+run = '''julia --project=. -e 'using Pkg; Pkg.test(allow_reresolve = false, julia_args = ["--depwarn=error"])' '''
+
+[tasks."julia:standards"]
+description = "Run the Julia standards workflow with autofixes"
+depends = ["julia:fmt"]
+
+[tasks."julia:standards:check"]
+description = "Run the Julia standards CI gate"
+depends = ["julia:fmt:check", "julia:lint", "julia:test"]

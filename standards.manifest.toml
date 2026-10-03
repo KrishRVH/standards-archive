@@ -192,6 +192,23 @@ mirror = [
 shared_mirror = [".gitignore"]
 required_tester_files = ["bun.lock"]
 
+[profiles.julia]
+name = "Julia"
+template = "Julia"
+tester = "testers/julia"
+task_prefix = "julia"
+task_fragment = "20-julia.toml"
+mirror = [
+  "Manifest.toml",
+  "Project.toml",
+  "scripts/format.sh",
+  "src/ProjectName.jl",
+  "test/Project.toml",
+  "test/runtests.jl",
+  "tools/Project.toml",
+  "tools/lint.jl",
+]
+
 [profiles.lua]
 name = "Lua"
 template = "Lua"

@@ -1,0 +1,12 @@
+min_version = "2026.6.12"
+
+[settings]
+lockfile = true
+
+[tasks.standards]
+description = "Run the Julia tester standards workflow"
+depends = ["julia:standards"]
+
+[tasks."standards:check"]
+description = "Run the Julia tester standards CI gate"
+depends = ["julia:standards:check"]

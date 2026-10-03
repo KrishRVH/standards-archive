@@ -1,0 +1,10 @@
+name = "ProjectName"
+uuid = "0a624119-c03b-42d8-b9ab-4f51b8cf5eeb"
+version = "0.1.0"
+authors = []
+
+[compat]
+julia = "1.13"
+
+[workspace]
+projects = ["test", "tools"]
