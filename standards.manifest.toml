@@ -209,6 +209,30 @@ mirror = [
   "tools/lint.jl",
 ]
 
+[profiles.lean]
+name = "Lean"
+template = "Lean"
+tester = "testers/lean"
+task_prefix = "lean"
+task_fragment = "20-lean.toml"
+mirror = [
+  "ProjectName.lean",
+  "ProjectName/Counter.lean",
+  "ProjectNameAudit.lean",
+  "ProjectNameAudit/Environment.lean",
+  "ProjectNameAudit/Finding.lean",
+  "ProjectNameAudit/Manifest.lean",
+  "ProjectNameAudit/Policy.lean",
+  "ProjectNameAudit/SelfTest.lean",
+  "ProjectNameAudit/Source.lean",
+  "ProjectNameMain.lean",
+  "ProjectNameTests.lean",
+  "lake-manifest.json",
+  "lakefile.toml",
+  "lean-toolchain",
+  "scripts/check.sh",
+]
+
 [profiles.lua]
 name = "Lua"
 template = "Lua"

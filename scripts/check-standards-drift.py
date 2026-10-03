@@ -32,6 +32,7 @@ AGGREGATE_MARKER_CASES = {
     "haskell": ("project.cabal",),
     "js": ("package.json", "jsconfig.json"),
     "julia": ("Project.toml", "src/ProjectName.jl"),
+    "lean": ("lean-toolchain", "lakefile.toml"),
     "lua": (".luarc.json",),
     "mojo": ("src/project_name/__init__.mojo",),
     "moonbit": ("moon.mod",),

@@ -1,0 +1,12 @@
+min_version = "2026.6.12"
+
+[settings]
+lockfile = true
+
+[tasks.standards]
+description = "Run the Lean tester standards workflow"
+depends = ["lean:standards"]
+
+[tasks."standards:check"]
+description = "Run the Lean tester standards CI gate"
+depends = ["lean:standards:check"]

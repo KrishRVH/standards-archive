@@ -90,6 +90,10 @@ if [ -f Project.toml ] && find src -maxdepth 1 -name '*.jl' -print -quit 2>/dev/
   dispatch julia
 fi
 
+if [ -f lean-toolchain ] && [ -f lakefile.toml ]; then
+  dispatch lean
+fi
+
 if [ -f alire.toml ] && find . -maxdepth 4 \\( -name '*.ads' -o -name '*.adb' -o -name '*.gpr' \\) -print -quit | grep -q .; then
   dispatch spark
 fi

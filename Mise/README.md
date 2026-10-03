@@ -97,10 +97,11 @@ constrain tools from a developer's global mise configuration.
 Language task files are additive. Keep only the `conf.d/20-*.toml` files that
 match the project languages; the aggregate `fmt`, `fmt:check`, `lint`, `test`,
 `standards`, and `standards:check` tasks dispatch to Bend, C, C++, Elixir,
-Fortran, GDScript, Haskell, JavaScript, Julia, Lua, Mojo, MoonBit, Odin, PHP,
-Roc, SPARK/Ada, Vx, Zero, and Zig when their project files are detected. Roc
-dispatch requires `main.roc`; Bend dispatch requires `PROOF.bend`; Zero dispatch
-requires `zero.toml`; MoonBit dispatch requires `moon.mod` or `moon.mod.json`;
+Fortran, GDScript, Haskell, JavaScript, Julia, Lean, Lua, Mojo, MoonBit, Odin,
+PHP, Roc, SPARK/Ada, Vx, Zero, and Zig when their project files are detected.
+Roc dispatch requires `main.roc`; Bend dispatch requires `PROOF.bend`; Zero
+dispatch requires `zero.toml`; MoonBit dispatch requires `moon.mod` or
+`moon.mod.json`; Lean dispatch requires `lean-toolchain` plus `lakefile.toml`;
 Julia dispatch requires `Project.toml` plus a `.jl` file under `src/`; Odin,
 Mojo, and Vx dispatch require an owned source file under `src/` or `tests/`;
 GDScript dispatch requires `project.godot` and an owned script under `src/` or
@@ -156,6 +157,16 @@ project-local depot in `.julia/`, so packages and precompile caches never touch
 `~/.julia`. One workspace `Manifest.toml` pins the package, its tests, and its
 tools; `julia:install` fails on a stale manifest, Runic owns formatting, and
 `julia:lint` runs Aqua and JET apart from `Pkg.test`.
+
+The Lean task file holds the catalog's strictest bar. It pins Lean 4.34.1 by
+release digest, plus rust and nanoda; Lake dependencies (Batteries, Plausible,
+lean4export, lean4lean) are pinned to commits and Lake's caches are disabled.
+`lean:lint` runs a Lean audit that fails closed on escape hatches,
+non-constructive axioms, missing specs or docs, and untyped binders;
+`lean:kernel` re-checks every declaration in leanchecker, lean4lean, and
+nanoda; and `lean:reproduce` rebuilds offline and requires byte-identical
+outputs. The gate takes about 5 minutes warm, the first build clones about
+900 MB of dependencies, and the reproducibility step requires Linux.
 
 The Mojo task file pins the official `mojo` PyPI wheel through mise's `pypi`
 backend, which locks the compiler, formatter, and debugger wheel graph by

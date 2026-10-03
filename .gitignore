@@ -271,6 +271,9 @@ __pycache__/
 # Julia
 **/.julia/
 
+# Lean
+**/.lake/
+
 # MoonBit
 **/.mooncakes/
 
