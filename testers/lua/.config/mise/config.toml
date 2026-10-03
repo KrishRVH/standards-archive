@@ -62,6 +62,10 @@ if [ -f PROOF.bend ]; then
   dispatch bend
 fi
 
+if [ -f zero.toml ]; then
+  dispatch zero
+fi
+
 if [ -f package.json ] && [ -f jsconfig.json ]; then
   dispatch js
 fi

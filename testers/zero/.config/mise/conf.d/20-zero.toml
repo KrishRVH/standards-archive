@@ -1,0 +1,28 @@
+[tools]
+"github:vercel-labs/zerolang" = { version = "0.3.4", rename_exe = "zero" }
+
+[tasks."zero:fmt"]
+description = "Format the Zero source projection and refresh zero.graph"
+run = "scripts/format.sh write"
+
+[tasks."zero:fmt:check"]
+description = "Check Zero formatting and graph-projection agreement"
+run = "scripts/format.sh check"
+
+[tasks."zero:lint"]
+description = "Typecheck the committed Zero graph without refreshing it"
+env = { ZERO_STALE = "fail" }
+run = "zero check ."
+
+[tasks."zero:test"]
+description = "Run Zero test blocks from the committed graph"
+env = { ZERO_STALE = "fail" }
+run = "zero test ."
+
+[tasks."zero:standards"]
+description = "Run the Zero standards workflow with autofixes"
+depends = ["zero:fmt"]
+
+[tasks."zero:standards:check"]
+description = "Run the Zero standards CI gate"
+depends = ["zero:fmt:check", "zero:lint", "zero:test"]

@@ -1,0 +1,12 @@
+min_version = "2026.6.12"
+
+[settings]
+lockfile = true
+
+[tasks.standards]
+description = "Run the Zero tester standards workflow"
+depends = ["zero:standards"]
+
+[tasks."standards:check"]
+description = "Run the Zero tester standards CI gate"
+depends = ["zero:standards:check"]

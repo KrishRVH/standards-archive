@@ -1,0 +1,16 @@
+const limit: i32 = 100
+
+pub fn next(value: i32) -> i32 {
+    if value >= limit {
+        return limit
+    }
+    return value + 1
+}
+
+test "next increments below the limit" {
+    expect next(41) == 42
+}
+
+test "next saturates at the limit" {
+    expect next(100) == 100
+}

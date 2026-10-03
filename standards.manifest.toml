@@ -264,6 +264,14 @@ mirror = [
   "tests/project_name_test.vx",
 ]
 
+[profiles.zero]
+name = "Zero"
+template = "Zero"
+tester = "testers/zero"
+task_prefix = "zero"
+task_fragment = "20-zero.toml"
+mirror = ["scripts/format.sh", "src/counter.0", "src/main.0", "zero.graph", "zero.toml"]
+
 [profiles.zig]
 name = "Zig"
 template = "Zig"

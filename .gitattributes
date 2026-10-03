@@ -66,6 +66,8 @@
 *.vx text
 *.zig text
 *.zon text
+# Zero's compiler input is a binary graph; `zero diff` renders it for review.
+zero.graph -text diff=zero-graph
 
 # Build/config
 *.cmake text

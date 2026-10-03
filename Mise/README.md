@@ -97,12 +97,13 @@ constrain tools from a developer's global mise configuration.
 Language task files are additive. Keep only the `conf.d/20-*.toml` files that
 match the project languages; the aggregate `fmt`, `fmt:check`, `lint`, `test`,
 `standards`, and `standards:check` tasks dispatch to Bend, C, C++, Elixir,
-Fortran, GDScript, Haskell, JavaScript, Lua, Odin, PHP, Roc, SPARK/Ada, Vx, and
-Zig when their project files are detected. Roc dispatch requires `main.roc`;
-Bend dispatch requires `PROOF.bend`; Odin and Vx dispatch require an owned
-source file under `src/` or `tests/`; GDScript dispatch requires `project.godot`
-and an owned script under `src/` or `tests/`; JavaScript dispatch requires
-`package.json` plus `jsconfig.json`.
+Fortran, GDScript, Haskell, JavaScript, Lua, Odin, PHP, Roc, SPARK/Ada, Vx,
+Zero, and Zig when their project files are detected. Roc dispatch requires
+`main.roc`; Bend dispatch requires `PROOF.bend`; Zero dispatch requires
+`zero.toml`; Odin and Vx dispatch require an owned source file under `src/` or
+`tests/`; GDScript dispatch requires `project.godot` and an owned script under
+`src/` or `tests/`; JavaScript dispatch requires `package.json` plus
+`jsconfig.json`.
 
 Each language fragment expresses static workflow composition with native mise
 dependencies and structured task references. Shared install, restore,
@@ -154,6 +155,11 @@ and z3. Native `vx-format` is checked through a staged copy, `vxc` type,
 placement, and contract checks fail on warnings via its diagnostics JSON, and
 `tests/*_test.vx` programs run through the JIT. The toolchain is about 4 GB
 installed; the fixture is verified on Linux x64 only.
+
+The Zero task file pins an exact zerolang release through mise's GitHub
+backend. `zero:lint` and `zero:test` compile the committed `zero.graph` with
+`ZERO_STALE=fail`, and `zero:fmt:check` requires the `.0` text to be formatted
+and to agree with the graph.
 
 The Lua task file pins Lua 5.4, runs StyLua, installs pinned Luacheck/Busted
 rocks into `.lua_modules`, and runs both Luacheck and LuaLS diagnostics. It
