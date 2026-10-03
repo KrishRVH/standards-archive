@@ -1,0 +1,12 @@
+min_version = "2026.6.12"
+
+[settings]
+lockfile = true
+
+[tasks.standards]
+description = "Run the Bend tester standards workflow"
+depends = ["bend:standards"]
+
+[tasks."standards:check"]
+description = "Run the Bend tester standards CI gate"
+depends = ["bend:standards:check"]

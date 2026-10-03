@@ -1,3 +1,11 @@
+[profiles.bend]
+name = "Bend"
+template = "Bend"
+tester = "testers/bend"
+task_prefix = "bend"
+task_fragment = "20-bend.toml"
+mirror = ["LAWS.bend", "PROOF.bend", "src/project_name.bend"]
+
 [profiles.c]
 name = "C"
 template = "C"

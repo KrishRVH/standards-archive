@@ -57,6 +57,7 @@
 *.tsx text
 *.cts text
 *.mts text
+*.bend text
 *.lua text
 *.odin text
 *.php text diff=php

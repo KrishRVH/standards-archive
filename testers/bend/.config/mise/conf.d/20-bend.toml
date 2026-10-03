@@ -1,0 +1,35 @@
+[env]
+# Skip Bend's daily update check, which writes ~/.bend and calls the network.
+BEND_NO_TELEMETRY = "1"
+
+[tools."http:bend"]
+version = "2.0.35"
+url = 'https://github.com/bendlang/bend/releases/download/v{{ version }}/bend-{{ version }}-{{ os(macos="darwin") }}-{{ arch() }}.tar.gz'
+checksum_url = "https://api.github.com/repos/bendlang/bend/releases/tags/v{{ version }}"
+checksum_expr = 'filter(fromJSON(body).assets, { #.name == filename })[0].digest'
+bin_path = "bend/bin"
+os = ["linux", "macos"]
+
+[tasks."bend:fmt"]
+description = "Check Bend source; Bend has no formatter"
+depends = ["bend:lint"]
+
+[tasks."bend:fmt:check"]
+description = "Check Bend source; Bend has no formatter"
+depends = ["bend:lint"]
+
+[tasks."bend:lint"]
+description = "Type- and termination-check the Bend package"
+run = "bend src/project_name.bend --check-only"
+
+[tasks."bend:test"]
+description = "Check every law in LAWS.bend against PROOF.bend"
+run = "bend PROOF.bend --check-only"
+
+[tasks."bend:standards"]
+description = "Run the Bend standards workflow"
+depends = ["bend:fmt"]
+
+[tasks."bend:standards:check"]
+description = "Run the Bend standards CI gate"
+depends = ["bend:fmt:check", "bend:lint", "bend:test"]

@@ -58,6 +58,10 @@ if [ -f main.roc ]; then
   dispatch roc
 fi
 
+if [ -f PROOF.bend ]; then
+  dispatch bend
+fi
+
 if [ -f package.json ] && [ -f jsconfig.json ]; then
   dispatch js
 fi

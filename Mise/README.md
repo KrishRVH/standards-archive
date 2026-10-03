@@ -96,13 +96,13 @@ constrain tools from a developer's global mise configuration.
 
 Language task files are additive. Keep only the `conf.d/20-*.toml` files that
 match the project languages; the aggregate `fmt`, `fmt:check`, `lint`, `test`,
-`standards`, and `standards:check` tasks dispatch to C, C++, Elixir,
-Fortran, GDScript, Haskell, JavaScript, Lua, Odin, PHP, Roc, SPARK/Ada,
-and Zig when their project files are detected. Roc dispatch requires
-`main.roc`; Odin dispatch requires an owned source file under `src/`
-or `tests/`; GDScript dispatch requires `project.godot` and an owned script
-under `src/` or `tests/`; JavaScript dispatch requires `package.json` plus
-`jsconfig.json`.
+`standards`, and `standards:check` tasks dispatch to Bend, C, C++, Elixir,
+Fortran, GDScript, Haskell, JavaScript, Lua, Odin, PHP, Roc, SPARK/Ada, and Zig
+when their project files are detected. Roc dispatch requires `main.roc`; Bend
+dispatch requires `PROOF.bend`; Odin dispatch requires an owned source file
+under `src/` or `tests/`; GDScript dispatch requires `project.godot` and an
+owned script under `src/` or `tests/`; JavaScript dispatch requires
+`package.json` plus `jsconfig.json`.
 
 Each language fragment expresses static workflow composition with native mise
 dependencies and structured task references. Shared install, restore,
@@ -143,6 +143,11 @@ lock. Native `roc fmt`, warning-failing `roc check`, and top-level `expect`
 tests form the generic gate. The fixture is verified on Linux x64; the declared
 tool also maps the official Linux ARM64, macOS x64/Apple Silicon, and Windows
 x64 assets. Project-scoped format discovery requires a POSIX shell.
+
+The Bend task file pins an exact release by GitHub digest for Linux and
+macOS. Bend has no formatter, so `fmt` and `fmt:check` run the compiler check;
+`bend:lint` checks the package and `bend:test` checks every law through
+`PROOF.bend`, with `BEND_NO_TELEMETRY` set.
 
 The Lua task file pins Lua 5.4, runs StyLua, installs pinned Luacheck/Busted
 rocks into `.lua_modules`, and runs both Luacheck and LuaLS diagnostics. It

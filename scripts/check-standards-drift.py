@@ -23,6 +23,7 @@ OPTIONAL_PROFILE_KEYS = {"dagger", "fixture_checks", "required_tester_files", "s
 PROFILE_KEYS = REQUIRED_PROFILE_KEYS | OPTIONAL_PROFILE_KEYS
 REQUIRED_TASK_SUFFIXES = ("fmt", "fmt:check", "lint", "test", "standards", "standards:check")
 AGGREGATE_MARKER_CASES = {
+    "bend": ("PROOF.bend",),
     "c": ("CMakeLists.txt", "src/main.c"),
     "cpp": ("CMakeLists.txt", "src/library.hpp"),
     "elixir": ("mix.exs",),
