@@ -1,0 +1,8 @@
+// Returns the distance from low to high. The compiler proves the result is
+// non-negative for every range the precondition admits.
+fn span(low : i32, high : i32) -> i32
+requires low >= 0 && low <= high
+ensures return >= 0
+{
+  return high - low;
+}

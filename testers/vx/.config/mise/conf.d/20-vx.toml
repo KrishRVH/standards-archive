@@ -1,0 +1,53 @@
+# vxc lowers through LLVM 22 MLIR at run time, and z3 discharges contracts.
+[tools]
+"conda:clang" = "22.1.8"
+"conda:libffi" = "3.7.0"
+"conda:libmlir" = "22.1.8"
+"conda:llvm-tools" = "22.1.8"
+"conda:mlir" = "22.1.8"
+
+[tools."http:vx"]
+version = "0.0.2"
+checksum_url = "https://api.github.com/repos/vx-lang/Vx/releases/tags/v{{ version }}"
+checksum_expr = 'filter(fromJSON(body).assets, { #.name == filename })[0].digest'
+strip_components = 1
+bin_path = "bin"
+
+[tools."http:vx".platforms]
+linux-x64 = { url = "https://github.com/vx-lang/Vx/releases/download/v0.0.2/vx-v0.0.2-x86_64-unknown-linux-gnu.tar.gz" }
+macos-arm64 = { url = "https://github.com/vx-lang/Vx/releases/download/v0.0.2/vx-v0.0.2-aarch64-apple-darwin.tar.gz" }
+
+[tools."http:z3"]
+version = "5.1.0"
+checksum_url = "https://api.github.com/repos/Z3Prover/z3/releases/tags/z3-{{ version }}"
+checksum_expr = 'filter(fromJSON(body).assets, { #.name == filename })[0].digest'
+strip_components = 1
+bin_path = "bin"
+
+[tools."http:z3".platforms]
+linux-x64 = { url = "https://github.com/Z3Prover/z3/releases/download/z3-5.1.0/z3-5.1.0-x64-glibc-2.39.zip" }
+macos-arm64 = { url = "https://github.com/Z3Prover/z3/releases/download/z3-5.1.0/z3-5.1.0-arm64-osx-13.3.zip" }
+
+[tasks."vx:fmt"]
+description = "Format project-owned Vx source"
+run = "scripts/format.sh write"
+
+[tasks."vx:fmt:check"]
+description = "Check Vx formatting"
+run = "scripts/format.sh check"
+
+[tasks."vx:lint"]
+description = "Check Vx types, placement, and contracts; fail on warnings"
+run = "scripts/check.sh lint"
+
+[tasks."vx:test"]
+description = "Run Vx test programs through the JIT"
+run = "scripts/check.sh test"
+
+[tasks."vx:standards"]
+description = "Run the Vx standards workflow with autofixes"
+depends = ["vx:fmt"]
+
+[tasks."vx:standards:check"]
+description = "Run the Vx standards CI gate"
+depends = ["vx:fmt:check", "vx:lint", "vx:test"]

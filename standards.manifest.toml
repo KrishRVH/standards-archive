@@ -250,6 +250,20 @@ mirror = [
 ]
 required_tester_files = ["alire/alire.lock"]
 
+[profiles.vx]
+name = "Vx"
+template = "Vx"
+tester = "testers/vx"
+task_prefix = "vx"
+task_fragment = "20-vx.toml"
+mirror = [
+  "scripts/check.sh",
+  "scripts/format.sh",
+  "scripts/llvm-config",
+  "src/project_name.vx",
+  "tests/project_name_test.vx",
+]
+
 [profiles.zig]
 name = "Zig"
 template = "Zig"

@@ -36,6 +36,7 @@ AGGREGATE_MARKER_CASES = {
     "php": ("composer.json",),
     "roc": ("main.roc",),
     "spark": ("alire.toml", "src/project.ads"),
+    "vx": ("src/project_name.vx",),
     "zig": ("build.zig",),
 }
 DAGGER_MIRROR = ("dagger/package.json", "dagger/tsconfig.json", "dagger/src/index.ts")

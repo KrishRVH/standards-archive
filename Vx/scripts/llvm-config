@@ -1,0 +1,8 @@
+#!/bin/sh
+# Answers vxc's only llvm-config query with the pinned libmlir library path.
+set -eu
+if [ "$*" != --libdir ]; then
+  echo "scripts/llvm-config answers only --libdir" >&2
+  exit 2
+fi
+printf "%s/lib\n" "$(mise where conda:libmlir)"

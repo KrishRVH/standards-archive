@@ -1,0 +1,8 @@
+import std::googletest;
+import src::project_name;
+
+fn main() -> i32 {
+  expect_eq(span(0, 0), 0);
+  expect_eq(span(2, 7), 5);
+  return 0;
+}
