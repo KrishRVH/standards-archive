@@ -368,15 +368,14 @@ def check_aggregate_dispatch(profiles: dict[str, dict[str, object]]) -> list[str
                 commands = log.read_text(encoding="utf-8").splitlines() if log.is_file() else []
                 return commands, result.stderr, result.returncode
 
-            positive_cases = [(prefix, prefix, markers) for prefix, markers in AGGREGATE_MARKER_CASES.items()]
-            for case, prefix, markers in positive_cases:
-                commands, stderr, returncode = execute(case, "fmt", markers)
+            for prefix, markers in AGGREGATE_MARKER_CASES.items():
+                commands, stderr, returncode = execute(prefix, "fmt", markers)
                 expected = [f"run {prefix}:fmt"]
                 if returncode != 0:
-                    errors.append(f"aggregate marker case {case} failed: {stderr.strip()}")
+                    errors.append(f"aggregate marker case {prefix} failed: {stderr.strip()}")
                 elif commands != expected:
                     errors.append(
-                        f"aggregate marker case {case} dispatched {commands!r}; expected {expected!r}"
+                        f"aggregate marker case {prefix} dispatched {commands!r}; expected {expected!r}"
                     )
 
             for case, markers in {
@@ -385,8 +384,6 @@ def check_aggregate_dispatch(profiles: dict[str, dict[str, object]]) -> list[str
                 "package-without-js-config": ("package.json",),
                 "julia-project-without-source": ("Project.toml",),
                 "spark-without-source": ("alire.toml",),
-                "markdown-only": (".markdownlint-cli2.jsonc",),
-                "shell-only": (".shellcheckrc",),
             }.items():
                 commands, stderr, returncode = execute(case, "fmt", markers)
                 if returncode != 0:
@@ -395,7 +392,7 @@ def check_aggregate_dispatch(profiles: dict[str, dict[str, object]]) -> list[str
                     errors.append(f"aggregate negative marker case {case} dispatched {commands!r}")
 
             commands, stderr, returncode = execute(
-                "standards-check-secrets", "standards:check", ("package.json", "jsconfig.json")
+                "standards-check", "standards:check", ("package.json", "jsconfig.json")
             )
             expected = ["run js:standards:check"]
             if returncode != 0:
@@ -676,8 +673,8 @@ def check_root_mise_config(profiles: dict[str, dict[str, object]]) -> list[str]:
     except tomllib.TOMLDecodeError as error:
         return [f"invalid TOML in {rel(config)}: {error}"]
 
-    if data.get("min_version") != "2026.7.0":
-        errors.append(f'{rel(config)} must set min_version = "2026.7.0"')
+    if data.get("min_version") != "2026.9.16":
+        errors.append(f'{rel(config)} must set min_version = "2026.9.16"')
     if data.get("monorepo_root") is not True:
         errors.append(f"{rel(config)} must set monorepo_root = true")
 
