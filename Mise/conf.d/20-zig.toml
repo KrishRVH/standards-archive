@@ -10,7 +10,7 @@ description = "Check Zig formatting"
 run = "scripts/format.sh check"
 
 [tasks."zig:lint"]
-description = "Compile Zig in strict native modes"
+description = "Compile Zig in the safety-checked Debug and ReleaseSafe modes"
 run = ["zig build -Doptimize=Debug --summary all", "zig build -Doptimize=ReleaseSafe --summary all"]
 
 [tasks."zig:test"]
@@ -27,6 +27,7 @@ depends = ["zig:fmt"]
 
 [tasks."zig:standards:check"]
 description = "Run the Zig standards CI gate"
+# zig:lint and zig:release both install into zig-out/, so the lanes run in turn.
 run = [
   { task = "zig:fmt:check" },
   { task = "zig:lint" },
