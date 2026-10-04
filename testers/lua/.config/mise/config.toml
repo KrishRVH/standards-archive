@@ -82,7 +82,7 @@ if find src tests -type f \\( -name '*.mojo' -o -name '*.🔥' \\) -print -quit 
   dispatch mojo
 fi
 
-if [ -f moon.mod ] || [ -f moon.mod.json ]; then
+if [ -f moon.mod ]; then
   dispatch moonbit
 fi
 

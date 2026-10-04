@@ -100,12 +100,12 @@ match the project languages; the aggregate `fmt`, `fmt:check`, `lint`, `test`,
 Fortran, GDScript, Haskell, JavaScript, Julia, Lean, Lua, Mojo, MoonBit, Odin,
 PHP, Roc, SPARK/Ada, Vx, Zero, and Zig when their project files are detected.
 Roc dispatch requires `main.roc`; Bend dispatch requires `PROOF.bend`; Zero
-dispatch requires `zero.toml`; MoonBit dispatch requires `moon.mod` or
-`moon.mod.json`; Lean dispatch requires `lean-toolchain` plus `lakefile.toml`;
-Julia dispatch requires `Project.toml` plus a `.jl` file under `src/`; Odin,
-Mojo, and Vx dispatch require an owned source file under `src/` or `tests/`;
-GDScript dispatch requires `project.godot` and an owned script under `src/` or
-`tests/`; JavaScript dispatch requires `package.json` plus `jsconfig.json`.
+dispatch requires `zero.toml`; MoonBit dispatch requires `moon.mod`; Lean
+dispatch requires `lean-toolchain` plus `lakefile.toml`; Julia dispatch requires
+`Project.toml` plus a `.jl` file under `src/`; Odin, Mojo, and Vx dispatch
+require an owned source file under `src/` or `tests/`; GDScript dispatch
+requires `project.godot` and an owned script under `src/` or `tests/`;
+JavaScript dispatch requires `package.json` plus `jsconfig.json`.
 
 Each language fragment expresses static workflow composition with native mise
 dependencies and structured task references. Shared install, restore,

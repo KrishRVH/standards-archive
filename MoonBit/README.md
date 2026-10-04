@@ -9,9 +9,7 @@ documents, and publishes. The best starting points are the official
 [language tour](https://tour.moonbitlang.com/).
 
 MoonBit is pre-1.0. The language, core library, manifest formats, and
-toolchain behavior still change between releases; the pinned toolchain, for
-example, scaffolds `moon.mod` and `moon.pkg` manifests in place of the older
-`moon.mod.json` and `moon.pkg.json`. This profile is a small,
+toolchain behavior may all change between releases. This profile is a small,
 reproducible way to explore the language, not a claim that its ecosystem has
 converged.
 
