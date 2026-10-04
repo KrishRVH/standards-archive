@@ -48,7 +48,7 @@ wait_for = ["lean:lint"]
 run = "lake test"
 
 [tasks."lean:kernel"]
-description = "Recheck every declaration with leanchecker and nanoda"
+description = "Recheck every declaration with leanchecker, lean4lean, and nanoda"
 depends = ["lean:build"]
 wait_for = ["lean:test"]
 run = ["scripts/check.sh kernel", "scripts/check.sh nanoda"]

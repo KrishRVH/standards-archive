@@ -13,20 +13,87 @@ namespace ProjectNameAudit
 
 open Lean System
 
-/-- Keywords no owned file may contain. Each one bypasses the kernel, hides code from it,
-changes options that belong in the Lake configuration, runs code during elaboration, or leaves
-an unpinned simplifier search behind. -/
+/-- Keywords no owned file may contain, grouped by what each one does. `isBannedAtom` also bans
+every `#` command and every `builtin_` and `register_` command. -/
 def bannedAtoms : List String :=
-  ["sorry", "admit", "native_decide", "set_option", "axiom", "opaque", "partial",
-    "noncomputable", "decreasing_by", "termination_by", "extern", "#exit", "#eval",
-    "#print", "#check", "#reduce", "#synth", "#guard", "#guard_msgs", "run_cmd", "run_elab",
-    "run_meta", "macro", "macro_rules", "syntax", "elab", "elab_rules", "notation",
-    "infix", "infixl", "infixr", "prefix", "postfix", "initialize", "builtin_initialize",
-    "simp?", "simp?!", "simp_all?", "simp_all?!", "dsimp?", "dsimp?!", "simpa?", "simpa?!"]
+  -- Bypasses the kernel or hides code from it.
+  ["sorry", "admit", "native_decide", "bv_decide", "bv_check", "axiom", "opaque", "partial",
+    "noncomputable", "decreasing_by", "termination_by", "extern", "test_extern", "init_quot",
+    -- Changes options that belong in the Lake configuration.
+    "set_option", "unlock_limits",
+    -- Runs code during elaboration, or defines syntax, macros, elaborators, simplification
+    -- procedures, or initializers.
+    "run_cmd", "run_elab", "run_meta", "run_tac", "set_library_suggestions", "macro",
+    "macro_rules", "syntax", "declare_syntax_cat", "elab", "elab_rules", "elab_stx_quot",
+    "declare_config_elab", "declare_config_elab_legacy", "declare_command_config_elab",
+    "declare_command_config_elab_legacy", "declare_core_config_elab",
+    "declare_term_config_elab", "declare_simp_like_tactic", "binder_predicate", "notation",
+    "infix", "infixl", "infixr", "prefix", "postfix", "initialize", "simproc", "simproc_decl",
+    "dsimproc", "dsimproc_decl", "cbv_simproc", "cbv_simproc_decl", "simproc_pattern%",
+    "cbv_simproc_pattern%", "grind_propagator", "declare_sint_simprocs",
+    "declare_uint_simprocs",
+    -- Leaves an unpinned search behind.
+    "simp?", "simp?!", "simp_all?", "simp_all?!", "dsimp?", "dsimp?!", "simpa?", "simpa?!",
+    "exact?", "apply?", "rw?", "try?", "grind?", "bv_decide?", "mvcgen?"]
 
-/-- Attributes that replace or expose compiled code without kernel checking. -/
+/-- Whether a keyword is a `#` command, such as `#eval` or `#print`. The literal openers `#[`
+and `#v[` are not commands. -/
+def isHashCommand (value : String) : Bool :=
+  match value.toList with
+  | '#' :: first :: rest =>
+    first.isAlpha &&
+      rest.all (fun (char : Char) => char.isAlphanum || char == '_' || char == '!' || char == '?')
+  | _ => false
+
+/-- Whether an owned file of the given role may not contain a keyword. `builtin_` commands
+belong to Lean itself, and every `register_` command declares an initializer. The audit tool
+may use `unsafe`, because it must call Lean's importer. -/
+def isBannedAtom (role : Role) (value : String) : Bool :=
+  bannedAtoms.contains value || isHashCommand value || value.startsWith "builtin_" ||
+    value.startsWith "register_" || (value == "unsafe" && role != .audit)
+
+/-- Attributes no owned declaration may carry, grouped by what each one does. `isBannedAttribute`
+also bans every `builtin_` attribute and every parser attribute. -/
 def bannedAttributes : List Name :=
-  [`implemented_by, `export, `never_extract, `extern, `csimp]
+  -- Replaces or exposes compiled code without kernel checking.
+  [`implemented_by, `export, `extern, `never_extract, `csimp, `cpass,
+    -- Runs code at initialization, which the audit itself performs when it imports a module.
+    `init,
+    -- Registers code the elaborator, simplifier, or pretty printer runs.
+    `command_elab, `term_elab, `tactic, `macro, `doElem_elab, `doElem_control_info,
+    `inductive_elab, `grind_tactic, `try_tactic, `try_suggestion, `library_suggestions,
+    `sym_discharger, `sym_simproc, `sym_dsimproc, `frameproc, `simprocAttr, `sevalprocAttr,
+    `cbvSimprocAttr, `simprocBuiltinAttr, `sevalprocBuiltinAttr, `cbvSimprocBuiltinAttr,
+    `grindPropagatorBuiltinAttr, `delab, `app_unexpander, `formatter, `parenthesizer,
+    `combinator_formatter, `combinator_parenthesizer, `category_parenthesizer, `quot_precheck,
+    `run_parser_attribute_hooks, `run_builtin_parser_attribute_hooks, `doc_role,
+    `doc_directive, `doc_code_block, `doc_command, `doc_block_md, `doc_inline_md,
+    `doc_code_block_suggestions, `doc_code_suggestions, `deferred_doc_check,
+    -- Registers code a linter runs, including the audit's own linter pass, or exempts a
+    -- declaration from a linter.
+    `env_linter, `nolint, `missing_docs_handler, `unused_variables_ignore_fn,
+    `package_code_quality_check,
+    -- Registers code the language server runs.
+    `code_action_provider, `command_code_action, `hole_code_action, `server_rpc_method,
+    `widget_module]
+
+/-- Whether no owned declaration may carry an attribute. `builtin_` attributes belong to Lean
+itself, and every parser attribute registers code the parser runs. -/
+def isBannedAttribute (name : Name) : Bool :=
+  bannedAttributes.contains name || name.toString.startsWith "builtin_" ||
+    name.toString.endsWith "_parser"
+
+/-- The attribute an attribute instance applies, named as Lean's elaborator names it: the
+identifier of a simple attribute, otherwise the last component of its syntax kind. -/
+def attributeName? (stx : Syntax) : Option Name :=
+  if stx.isOfKind ``Lean.Parser.Term.attrInstance then
+    let attr : Syntax := stx[1]
+    if attr.isOfKind ``Lean.Parser.Attr.simple then some attr[0].getId.eraseMacroScopes
+    else
+      match attr.getKind with
+      | .str _ last => some (Name.mkSimple last)
+      | _ => none
+  else none
 
 /-- Simplifier tactics that must name their lemmas with `only`. -/
 def onlyRequired : List SyntaxNodeKind :=
@@ -133,16 +200,12 @@ def binderMessage (stx : Syntax) : Option String :=
 def nodeMessages (role : Role) (stx : Syntax) : List String :=
   let atomRule : List String :=
     match stx with
-    | .atom _ value =>
-      let unsafeBanned : Bool := value == "unsafe" && role != .audit
-      if bannedAtoms.contains value || unsafeBanned then
-        [s!"banned keyword `{value}`"]
-      else []
+    | .atom _ value => if isBannedAtom role value then [s!"banned keyword `{value}`"] else []
     | _ => []
   let attributeRule : List String :=
-    if stx.isOfKind ``Lean.Parser.Attr.simple && bannedAttributes.contains stx[0].getId then
-      [s!"banned attribute `{stx[0].getId}`"]
-    else []
+    match attributeName? stx with
+    | some name => if isBannedAttribute name then [s!"banned attribute `{name}`"] else []
+    | none => []
   let simpRule : List String :=
     if onlyRequired.contains stx.getKind && !hasOnly stx then
       ["simplifier call without `only`"]

@@ -36,13 +36,15 @@ why and shows the evidence.
 Copy every file in this folder into a Lean project, and copy
 `Mise/conf.d/20-lean.toml` into `.config/mise/conf.d/`. Replace `ProjectName`
 and `project_name` in file names, module names, `lakefile.toml`, and the audit
-policy (`ProjectNameAudit/Policy.lean` and the roots in `ProjectNameAudit.lean`).
-Keep `.lake/` in `.gitignore`; Lake writes dependencies and build output there.
+policy (`ProjectNameAudit/Policy.lean` and the roots in
+`ProjectNameAudit.lean`). The shared `.gitignore` covers `.lake/`, where Lake
+writes dependencies and build output.
 
 The layout follows Lake's conventions:
 
 - `ProjectName.lean` and `ProjectName/`: the library. Every module uses the
-  module system and is imported by the root, which the audit enforces.
+  module system, and the root imports them all. The audit fails on any owned
+  module that the audited roots do not import.
 - `ProjectNameMain.lean`: the executable. Its root is not named `Main`:
   lean4export ships a `Main` module, and a dependency module of the same name
   would shadow it. The audit rejects any owned module that resolves outside the
@@ -84,8 +86,8 @@ any rule fires on a compliant control module.
 Toolchain and dependencies:
 
 - Lean 4.34.1 is pinned by its GitHub release digest. It is a patch release
-  whose three fixes close use-after-free paths its release notes say could be
-  extended into a proof of `False`.
+  with three memory-safety fixes; its release notes say two of them close
+  use-after-free paths that could be extended into a proof of `False`.
 - `lean-toolchain` must name exactly the running compiler.
 - Every Lake dependency must be on the audit allowlist, come from an https
   GitHub URL, and be pinned to a full commit hash in both `lakefile.toml` and
@@ -112,14 +114,21 @@ Compilation:
 Source rules, from the audit's `source` check on the elaborated syntax:
 
 - Banned keywords: `sorry`, `admit`, `native_decide`, `decide +native`,
-  `set_option` (options belong in `lakefile.toml`, so no proof can raise
-  `maxHeartbeats` or set `debug.skipKernelTC`), `axiom`, `opaque`, `partial`,
+  `bv_decide`, and the other kernel bypasses; `set_option` and
+  `unlock_limits` (options belong in `lakefile.toml`, so no proof can raise
+  `maxHeartbeats` or set `debug.skipKernelTC`); `axiom`, `opaque`, `partial`,
   `unsafe` (outside the audit tool, which must call Lean's importer),
-  `noncomputable`, `termination_by`, `decreasing_by`, `#eval` and every other
-  `#` command, `run_cmd` and its relatives, and every macro, syntax, notation,
-  elaborator, and initializer command.
-- Banned attributes: `implemented_by`, `extern`, `export`, `never_extract`,
-  and `csimp`.
+  `noncomputable`, `termination_by`, and `decreasing_by`; every `#` command;
+  `run_cmd` and its relatives; every macro, syntax, notation, elaborator,
+  simplification procedure, and initializer command, including every
+  `builtin_` and `register_` command; and search tactics such as `exact?`.
+- Banned attributes, named as Lean's elaborator names them:
+  `implemented_by`, `extern`, `export`, `never_extract`, `csimp`, and `cpass`,
+  which replace or expose compiled code; `init`, which would run inside the
+  audit when it imports the module; every attribute that registers code for
+  the elaborator, simplifier, parser, pretty printer, linters, or language
+  server, including every `builtin_` and parser attribute; and Batteries'
+  `nolint`, which records a linter exception.
 - Every simplifier call names its lemmas with `only`, and `simp?` and its
   relatives are banned, so no proof depends on the simp set of the day.
 - Every binder has a type: declaration binders, `fun`, `∀`, `∃`, `let`,
@@ -211,7 +220,7 @@ profile:
   unsafe callees instead.
 - `lake shake` on the audit: under the module system, Batteries' linter API is
   `meta`, and calling it from a runtime program requires the whole tool to be
-  `meta`. That build of the audit crashed with exit 139 on its first import, so
+  `meta`. That build of the audit crashes with exit 139 on its first import, so
   the audit stays a classic, non-module program. Its source still passes every
   source and formatting rule, and its declarations are kernel-replayed.
 - `#guard`: `lake shake` does not count the compile-time evaluation `#guard`

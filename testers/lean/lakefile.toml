@@ -15,7 +15,7 @@ linter.missingDocs = true
 # Every dependency is pinned to a full commit; the audit rejects anything else.
 # Batteries supplies the environment linters, Plausible the property tests,
 # lean4export the export nanoda reads, and lean4lean a third kernel. lean4lean
-# pins an older Batteries; the root's pin above overrides it.
+# pins an older Batteries; the root's Batteries pin overrides it.
 [[require]]
 name = "batteries"
 git = "https://github.com/leanprover-community/batteries"
