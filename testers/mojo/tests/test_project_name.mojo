@@ -7,7 +7,7 @@ def test_clamp_keeps_value_inside_range() raises:
     assert_equal(clamp(5, 0, 10), 5)
 
 
-def test_clamp_raises_value_below_range() raises:
+def test_clamp_lifts_value_below_range() raises:
     assert_equal(clamp(-3, 0, 10), 0)
 
 

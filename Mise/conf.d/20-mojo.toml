@@ -1,5 +1,5 @@
-# The pypi backend locks the mojo wheel graph by digest in a revision 3
-# mise.lock, which mise 2026.9.16 added.
+# Locking the mojo wheel graph uses the pypi backend's `with` and `expose`
+# options, and mise 2026.9.16 reads the revision 3 lockfile it writes.
 min_version = "2026.9.16"
 
 [env]

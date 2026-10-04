@@ -8,10 +8,10 @@ part of the language. The best starting points are the official
 [manual](https://mojolang.org/docs/manual/) and
 [standard library reference](https://mojolang.org/docs/std/).
 
-Mojo reached 1.0 in August 2026, and Modular then published the compiler
-source under Apache 2.0 with LLVM exceptions. The PyPI wheels this profile
-pins still declare Modular's `LicenseRef-MAX-Platform-Software-License` in
-their metadata; review that license before redistributing the toolchain.
+Modular publishes the compiler source under Apache 2.0 with LLVM exceptions,
+but the PyPI wheels this profile pins declare Modular's
+`LicenseRef-MAX-Platform-Software-License` in their metadata; review that
+license before redistributing the toolchain.
 
 ## Why Mojo Is Here
 
@@ -20,8 +20,8 @@ Mojo earns a place here through a few unusually deliberate choices:
 - Python's surface without its runtime model: structs are static, arguments
   have explicit conventions (`imm`, `mut`, `var`), and the compiler checks
   lifetimes and origins instead of relying on a garbage collector.
-- Raising is part of a function's signature. Since 1.0, `def` no longer implies
-  `raises`, so a call that can fail is visible at every boundary.
+- Raising is part of a function's signature: only a function declared
+  `raises` can fail, so a call that can fail is visible at every boundary.
 - Parameters are compile-time values evaluated by the same language, so
   specialization, vector widths, and hardware targets are ordinary code rather
   than a separate template or macro language.
@@ -67,8 +67,6 @@ These generic defaults stay out on purpose:
 - Pixi or a `pyproject.toml` project: the official guides use them to fetch
   the compiler, but mise already pins and locks it, and a `pyproject.toml`
   would make an adopting repository look like a Python project.
-- `mojo test`: Modular removed it. The standard library's `TestSuite` is the
-  supported test runner.
 - GPU kernels: the gate must run on any CI host. Add GPU tests in a separate
   task when a project targets an accelerator.
 - A precompiled `.mojoc` package as a release artifact: it is tied to the
