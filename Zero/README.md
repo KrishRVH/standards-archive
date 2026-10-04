@@ -30,8 +30,8 @@ looks like when the primary author is an agent and the reviewer is a person.
 ## Baseline
 
 Copy `zero.toml`, `zero.graph`, `src/`, `scripts/format.sh`, and
-`Mise/conf.d/20-zero.toml` into a Zero project, then put `.zero/` in the
-project's `.gitignore`. Replace `project-name` in `zero.toml` and the greeting
+`Mise/conf.d/20-zero.toml` into a Zero project; the shared `.gitignore` covers
+its `.zero/` cache. Replace `project-name` in `zero.toml` and the greeting
 in `src/main.0`, run `zero import .` to refresh the graph, and commit
 `zero.graph` with its projection.
 
@@ -66,9 +66,9 @@ patch, run `zero export .`. Then run `zero:fmt`.
 `diff=zero-graph`; for readable Git diffs, set
 `git config diff.zero-graph.textconv 'zero diff'`.
 
-The fixture pins an exact release through mise's GitHub backend; the
-committed lockfile records the GitHub-published digest. The formatting adapter
-requires a POSIX shell.
+The task file pins an exact release through mise's GitHub backend, and the
+fixture's committed lockfile records the GitHub-published digest. The formatting
+adapter requires a POSIX shell.
 
 ## Not Included
 

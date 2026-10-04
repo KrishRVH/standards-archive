@@ -1,15 +1,15 @@
 # Vx Standards
 
-[Vx](https://vxlang.org/) is a systems programming language for machines that
-are no longer a single processor. It compiles through MLIR to native x86-64 and
-AArch64 code, NVIDIA PTX, and Apple accelerator instructions. The best starting
-points are the official [documentation](https://vxlang.org/docs/) and the
-[language reference](https://github.com/vx-lang/Vx/tree/main/docs/lang).
+[Vx](https://vxlang.org/) is a systems programming language for machines built
+from several kinds of processor and memory. It compiles through MLIR to native
+x86-64 and AArch64 code, NVIDIA PTX, and Apple accelerator instructions. The
+best starting points are the official [documentation](https://vxlang.org/docs/)
+and the [language reference](https://github.com/vx-lang/Vx/tree/main/docs/lang).
 
-Vx is at v0.0.2, a research-stage compiler. Its syntax, standard library,
-diagnostics, and project conventions may all change. It defines no package
-manifest or test runner yet. This profile is a small, reproducible way to
-explore the language, not a claim that its ecosystem has converged.
+Vx is a research-stage compiler. Its syntax, standard library, diagnostics, and
+project conventions may all change. It defines no package manifest or test
+runner yet. This profile is a small, reproducible way to explore the language,
+not a claim that its ecosystem has converged.
 
 ## Why Vx Is Here
 
@@ -86,9 +86,9 @@ These generic defaults stay out on purpose:
 - The `curl | sh` installer: it resolves the latest release and the host's
   system LLVM at install time. The fragment pins an exact release with digests
   and a reviewed LLVM.
-- The CUDA build and GPU, NPU, or Apple Neural Engine examples: they need hardware the gate
-  cannot assume. Add a `--machine` admission check when a project targets real
-  devices.
+- The CUDA build and GPU, NPU, or Apple Neural Engine examples: they need
+  hardware the gate cannot assume. Add a `--machine` admission check when a
+  project targets real devices.
 - `--verify-seams`: it proves cross-device transfer obligations, and a
   CPU-only fixture has no seams to prove.
 - A package manifest, build system, or external test framework: Vx defines

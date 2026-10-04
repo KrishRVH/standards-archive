@@ -30,8 +30,8 @@ for native extensions where Julia relies on dispatch and specialization.
 ## Baseline
 
 Copy `Project.toml`, `Manifest.toml`, `src/`, `test/`, `tools/`,
-`scripts/format.sh`, and `Mise/conf.d/20-julia.toml` into a Julia package, and
-add `/.julia/` to the project's `.gitignore`. Replace `ProjectName` in the
+`scripts/format.sh`, and `Mise/conf.d/20-julia.toml` into a Julia package; the
+shared `.gitignore` covers its `.julia/` depot. Replace `ProjectName` in the
 module, file, and project names, generate a fresh package UUID with
 `julia -e 'using UUIDs; println(uuid4())'`, put it in all three
 `Project.toml` files, then run `mise run julia:update` and commit the

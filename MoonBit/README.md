@@ -36,8 +36,8 @@ contract is why MoonBit belongs in this catalog.
 ## Baseline
 
 Copy `moon.mod`, `src/`, `scripts/interface.sh`, and
-`Mise/conf.d/20-moonbit.toml` into a MoonBit project, and keep `_build/`,
-`.mooncakes/`, and `target/` out of version control. Replace
+`Mise/conf.d/20-moonbit.toml` into a MoonBit project; the shared `.gitignore`
+covers `_build/`, `.mooncakes/`, and `target/`. Replace
 `owner/project_name` in `moon.mod` with the real module name, rename
 `@project_name` in the tests, and run `mise run moonbit:standards` to
 regenerate the interface.
