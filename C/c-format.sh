@@ -32,7 +32,8 @@ list_files() {
     git -C "$SOURCE_ROOT" rev-parse --is-inside-work-tree > /dev/null 2>&1; then
     git -C "$SOURCE_ROOT" ls-files --cached --others --exclude-standard -z -- \
       '*.c' '*.h' \
-      ':(exclude)build/**' ':(exclude)build-*/**' |
+      ':(exclude,glob)**/build/**' ':(exclude,glob)**/build-*/**' \
+      ':(exclude,glob)**/vendor/**' ':(exclude,glob)**/third_party/**' |
       while IFS= read -r -d '' file; do
         [[ -f "$SOURCE_ROOT/$file" ]] || continue
         printf '%s/%s\0' "$SOURCE_ROOT" "$file"

@@ -226,6 +226,7 @@ run_format_tests() {
   local scratch_dir="$1"
   local fixture_root="$ROOT/standards-tests/format"
   local source_dir="$scratch_dir/format source"
+  local checkout_dir="$scratch_dir/format checkout"
 
   note "clang-format golden layout and idempotence"
   clang-format --style="file:$ROOT/.clang-format" --assume-filename=representative.c \
@@ -246,6 +247,15 @@ run_format_tests() {
   cp "$scratch_dir/formatted.c" "$source_dir/example.c"
   ln -s "$(command -v clang-format)" "$scratch_dir/clang format"
   C_CLANG_FORMAT="$scratch_dir/clang format" "$ROOT/c-format.sh" check "$source_dir"
+
+  note "clang-format skips vendored sources in a git checkout"
+  mkdir -p "$checkout_dir/src" "$checkout_dir/third_party/upstream" "$checkout_dir/vendor"
+  cp "$ROOT/.clang-format" "$checkout_dir/.clang-format"
+  cp "$scratch_dir/formatted.c" "$checkout_dir/src/example.c"
+  printf 'int  upstream ( void ){return 0;}\n' > "$checkout_dir/third_party/upstream/upstream.c"
+  printf 'int  upstream ( void ){return 0;}\n' > "$checkout_dir/vendor/upstream.c"
+  git init -q "$checkout_dir"
+  "$ROOT/c-format.sh" check "$checkout_dir"
 }
 
 run_analyzer_tests() {
@@ -575,7 +585,7 @@ run_warning_diagnostic_matrix() {
   done < "$ROOT/standards-tests/compiler/warning-cases.tsv"
 }
 
-run_warning_behavior_contracts() {
+run_common_definition_contract() {
   local scratch_dir="$1"
   local compiler="$2"
   local fixture_root="$ROOT/standards-tests/compiler"
@@ -583,14 +593,7 @@ run_warning_behavior_contracts() {
   # lld and Apple ld64 say "duplicate symbol". grep -F matches either line.
   local common_diagnostic=$'multiple definition\nduplicate symbol'
 
-  note "$compiler warning behavior contracts"
-  "$compiler" -std=c99 -fsyntax-only -DCASE_WALL -Wall \
-    "$fixture_root/warning-fixtures.c" > "$scratch_dir/$compiler-warning-only.log" 2>&1
-  expect_failure_containing "$compiler blanket Werror" "error:" \
-    "$scratch_dir/$compiler-werror.log" \
-    "$compiler" -std=c99 -fsyntax-only -DCASE_WALL -Wall -Werror \
-    "$fixture_root/warning-fixtures.c"
-
+  note "$compiler tentative-definition linkage contract"
   "$compiler" -std=c99 -fcommon "$fixture_root/common-definition-a.c" \
     "$fixture_root/common-definition-b.c" -o "$scratch_dir/$compiler-common"
   expect_failure_containing "$compiler fno-common definition ownership" \
@@ -605,7 +608,7 @@ run_clang_warning_contracts() {
   assert_compile_flag_contract "$scratch_dir" clang Debug clang-flags.txt
   verify_warning_resolution "$scratch_dir" clang Debug
   run_warning_diagnostic_matrix "$scratch_dir" clang
-  run_warning_behavior_contracts "$scratch_dir" clang
+  run_common_definition_contract "$scratch_dir" clang
 }
 
 run_gcc_warning_contracts() {
@@ -616,7 +619,7 @@ run_gcc_warning_contracts() {
   verify_warning_resolution "$scratch_dir" gcc Debug
   verify_warning_resolution "$scratch_dir" gcc Release
   run_warning_diagnostic_matrix "$scratch_dir" gcc
-  run_warning_behavior_contracts "$scratch_dir" gcc
+  run_common_definition_contract "$scratch_dir" gcc
 }
 
 # Each group configures its own build directories and log files under the
@@ -656,6 +659,7 @@ main() {
     native)
       require_tool clang
       require_tool clang-format
+      require_tool git
       printf '[INFO] clang: %s\n' "$(clang --version | head -n 1)"
       printf '[INFO] cmake: %s\n' "$(cmake --version | head -n 1)"
       run_posix_declaration_contract "$scratch_dir" clang

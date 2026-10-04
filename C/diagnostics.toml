@@ -158,7 +158,7 @@ exact = ["PROJECT_WERROR=ON", "-Werror"]
 rationale = "A reviewed warning matrix is enforceable only when findings cannot pass unnoticed."
 repair = "Fix the represented defect or document a narrow exception; do not remove Werror."
 exception = "Dependencies are not compiled under this private warning policy."
-fixture = "standards-tests/compiler common-flags.txt, warning-cases.tsv, and run.sh run_warning_behavior_contracts"
+fixture = "standards-tests/compiler/common-flags.txt, warning-cases.tsv, and run.sh run_warning_diagnostic_matrix"
 version = "Clang 22.1.8; GCC 15.2.0"
 
 [[rule]]
@@ -308,7 +308,7 @@ scope = "hard and advisory analysis invocations"
 profile = "analysis gates"
 severity = "hard"
 tool = "c-quality.sh"
-exact = ["compile_commands.json required", "all database entries selected as C", "one unambiguous command per source", "duplicate source commands rejected", "clang-tidy version 22.1.8", "25-check golden resolution", "direct clang-tidy over explicit files"]
+exact = ["compile_commands.json required", "all database entries selected as C", "one unambiguous command per source", "duplicate source commands rejected", "clang-tidy version 22.1.8", "25-check golden resolution", "run-clang-tidy over every database C translation unit"]
 rationale = "A missing database, tool, translation unit, duplicate/ambiguous source command, or changed check resolution must not report success."
 repair = "Run clang-fast configure, install the pinned tools, or explicitly review a check-set update."
 exception = "None when the gate is invoked. clangd is editor-only and cannot substitute."

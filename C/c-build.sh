@@ -361,7 +361,7 @@ main() {
         fail "usage: $0 verify-preset-contract BUILD_DIR SANITIZER BUILD_TYPE COMPILER_ID [PLATFORM_PROFILE]"
       verify_build_contract "$2" "$3" "$4" "$5" "${6:-iso-hosted}"
       ;;
-    *) fail "usage: $0 [native|portability|mingw]" ;;
+    *) fail "usage: $0 [native|portability|mingw|verify-preset-contract ...]" ;;
   esac
   printf '[PASS] C %s gate completed every required stage\n' "$MODE"
 }
