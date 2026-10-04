@@ -279,6 +279,7 @@ __pycache__/
 
 # Zero
 **/.zero/
+*.program-graph
 
 # Zig generated output
 /.zig-cache/

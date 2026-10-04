@@ -231,6 +231,7 @@ __pycache__/
 
 # Zero
 /.zero/
+*.program-graph
 
 # Zig
 /.zig-cache/
