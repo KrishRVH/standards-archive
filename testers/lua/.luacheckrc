@@ -42,11 +42,7 @@ exclude_files = {
 }
 
 -- Busted is the test runner installed by the shared mise Lua task.
-files["spec/*.lua"] = { std = "lua54+busted" }
 files["spec/**/*.lua"] = { std = "lua54+busted" }
-files["specs/*.lua"] = { std = "lua54+busted" }
 files["specs/**/*.lua"] = { std = "lua54+busted" }
-files["test/*.lua"] = { std = "lua54+busted" }
 files["test/**/*.lua"] = { std = "lua54+busted" }
-files["tests/*.lua"] = { std = "lua54+busted" }
 files["tests/**/*.lua"] = { std = "lua54+busted" }

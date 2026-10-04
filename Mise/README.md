@@ -194,8 +194,8 @@ backend. `zero:lint` and `zero:test` compile the committed `zero.graph` with
 and to agree with the graph.
 
 The Lua task file pins Lua 5.4, runs StyLua, installs pinned Luacheck/Busted
-rocks into `.lua_modules`, and runs both Luacheck and LuaLS diagnostics. It
-requires `luarocks` on PATH for lint/test tooling.
+rocks into `.lua_modules` with the `luarocks` that ships with the pinned Lua,
+and runs both Luacheck and LuaLS diagnostics.
 
 The GDScript task file pins Godot 4.7 and a portable, hashed GDToolkit
 environment. It formats and lints owned scripts, then uses headless Godot
