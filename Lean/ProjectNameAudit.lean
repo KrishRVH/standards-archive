@@ -10,7 +10,8 @@ Lake's lint driver. Each subcommand prints its findings and exits nonzero if
 there are any:
 
 * `self-test`: proves every source and environment rule fires on modules that
-  break it, and that none fires on compliant ones.
+  break it, that none fires on compliant ones, and that `source` reports a
+  banned command without running it.
 * `format`: text rules for every owned `.lean` file.
 * `source`: ownership and syntax rules for every owned `.lean` file. The build
   runs it before compiling any owned module, so no banned command can run first.
@@ -20,7 +21,7 @@ there are any:
 * `test-environment`: the same rules for the test harness, which defines its own
   `main` and so needs its own environment.
 
-Helpers for `scripts/check.sh` and the self-test print what they compute instead:
+Helpers for `scripts/check.sh` and the self-test print data rather than findings:
 
 * `dependency-imports`: the dependency modules owned files import, which must be
   built before `source` can parse with their syntax.

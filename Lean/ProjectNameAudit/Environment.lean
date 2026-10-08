@@ -296,9 +296,14 @@ def contractFindings (env : Environment) (owned : Array OwnedDecl) : MetaM (Arra
         | .str _ last => last
         | other => other.toString
       let contract : String := short.capitalize ++ "Spec"
-      findings := findings.push ⟨decl.label, "meets no contract; state its contract " ++
-        s!"`{contract}` in a specification module, prove there that at most one function " ++
-        s!"meets it, and prove `theorem {short}_spec : {contract} {short}` here"⟩
+      let remedy : String :=
+        if decl.info.type.getForallBody.isProp then
+          "a `Prop`-valued definition states requirements, so move it to a specification module"
+        else
+          s!"state its contract `{contract}` in a specification module, prove there that at " ++
+            "most one function meets it, and prove " ++
+            s!"`theorem {short}_spec : {contract} {short}` here"
+      findings := findings.push ⟨decl.label, s!"meets no contract; {remedy}"⟩
     else if exempt && bound.contains decl.name then
       findings := findings.push
         ⟨decl.label, "contract exemption is no longer needed; remove it from Policy.lean"⟩

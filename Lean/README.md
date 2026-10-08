@@ -89,7 +89,9 @@ Every guard below runs in `lean:standards:check`, and every finding says how
 to fix it. The audit's `self-test` check, which `lean:lint` runs first,
 elaborates a specification module and a library module that break each source
 and environment rule, each case in its own process, and fails unless the rule
-reports it, and fails if any rule fires on a compliant control.
+reports it, and fails if any rule fires on a compliant control. It also runs
+`source` on a module whose `#eval` would end the process with a success code,
+and fails unless the check reports the `#eval` instead of running it.
 
 Toolchain and dependencies:
 
@@ -120,7 +122,7 @@ Compilation:
   `lake shake` must find no unused or missing imports in them.
 
 Source rules, from the audit's `source` check, which `lean:build` runs before
-it compiles any owned module. The check parses each file without elaborating
+it compiles the library, executable, or tests. The check parses each file without elaborating
 it, with the syntax of the file's dependency imports, so a banned command, such
 as an `#eval` that ends the process with a success code, cannot run before the
 rule that bans it, in the build or in the audit:

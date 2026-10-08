@@ -9,8 +9,12 @@ library module that imports it, and together they break one rule; the audit
 must report a finding containing the expected text. Control cases must produce
 no finding at all, so the rules also prove they do not fire on compliant code.
 Each case runs in its own process, since every import of a module in one
-process keeps another copy of it in memory, and writes its specification module
-to a temporary directory, so the self-test needs no build output of its own.
+process keeps another copy of it in memory. Its modules are written to a
+temporary directory, where the library module imports the specification
+module's `.olean`, so the self-test needs none of the project's build output.
+
+A probe also runs the `source` check on a module whose `#eval` would end the
+process with a success code, which passes only if the check never runs it.
 -/
 
 namespace ProjectNameAudit
@@ -153,22 +157,22 @@ def libraryCases : List (String × String × String) :=
         ["theorem double_zero : double 0 = 0 := by",
          "  rfl"]), "has no docstring"⟩,
     ⟨"simp without only", withDecl (lines
-        ["/-- Spec. -/",
+        ["/-- A fact. -/",
          "theorem double_zero : double 0 = 0 := by",
          "  simp [double]"]),
       "simplifier call without `only`"⟩,
     ⟨"simp?", withDecl (lines
-        ["/-- Spec. -/",
+        ["/-- A fact. -/",
          "theorem double_zero : double 0 = 0 := by",
          "  simp? [double]"]),
       "banned keyword `simp?`"⟩,
     ⟨"untyped binder", withDecl (lines
-        ["/-- Spec. -/",
+        ["/-- A fact. -/",
          "theorem double_comm (count) : double count = count + count := by",
          "  rfl"]),
       "binder without a type"⟩,
     ⟨"untyped fun", withDecl (lines
-        ["/-- Spec. -/",
+        ["/-- A fact. -/",
          "theorem double_fun : (fun count => double count) 1 = 2 := by",
          "  rfl"]),
       "fun binder without a type"⟩,
@@ -179,7 +183,7 @@ def libraryCases : List (String × String × String) :=
          "  double twice"]),
       "let or have without a type"⟩,
     ⟨"untyped intro", withDecl (lines
-        ["/-- Spec. -/",
+        ["/-- A fact. -/",
          "theorem double_all : ∀ (count : Nat), double count = count + count := by",
          "  intro count",
          "  rfl"]),
@@ -191,7 +195,7 @@ def libraryCases : List (String × String × String) :=
       "definition without a result type"⟩,
     ⟨"set_option", withDecl (lines
         ["set_option maxHeartbeats 400000 in",
-         "/-- Spec. -/",
+         "/-- A fact. -/",
          "theorem double_zero : double 0 = 0 := by",
          "  rfl"]),
       "banned keyword `set_option`"⟩,
@@ -203,11 +207,16 @@ def libraryCases : List (String × String × String) :=
         ["/-- Triples, for use inside this module only. -/",
          "private def triple (count : Nat) : Nat :=",
          "  count * 3"]), ""⟩,
+    ⟨"scoped syntax control", withDecl (lines
+        ["open BitVec",
+         "",
+         "example : (1#'(by decide) : BitVec 1).toNat = 1 := by",
+         "  decide"]), ""⟩,
     ⟨"array literal control", withDecl (lines
         ["example : (#[1, 2] : Array Nat).size = 2 := by",
          "  decide"]), ""⟩,
     ⟨"run_tac", withDecl (lines
-        ["/-- Spec. -/",
+        ["/-- A fact. -/",
          "theorem double_zero : double 0 = 0 := by",
          "  run_tac pure ()",
          "  rfl"]),
@@ -219,12 +228,12 @@ def libraryCases : List (String × String × String) :=
         ["register_try?_tactic rfl"]),
       "banned keyword `register_try?_tactic`"⟩,
     ⟨"bv_decide", withDecl (lines
-        ["/-- Spec. -/",
+        ["/-- A fact. -/",
          "theorem bits : (1 : BitVec 2) + 1 = 2 := by",
          "  bv_decide"]),
       "banned keyword `bv_decide`"⟩,
     ⟨"exact?", withDecl (lines
-        ["/-- Spec. -/",
+        ["/-- A fact. -/",
          "theorem double_zero : double 0 = 0 := by",
          "  exact?"]),
       "banned keyword `exact?`"⟩,
@@ -325,8 +334,8 @@ def specCases : List SelfTestCase :=
        "theorem triple_spec : TripleSpec triple := by",
        "  rfl"]),
       "SelfTest.triple: meets no contract"⟩,
-    ⟨"weak uniqueness theorem", cleanSpec.replace "(hFirst : DoubleSpec first)"
-        "(same : first 0 = second 0) (hFirst : DoubleSpec first)", cleanSource,
+    ⟨"weak uniqueness theorem", cleanSpec.replace "    (hFirst : DoubleSpec first)"
+        "    (same : first 0 = second 0)\n    (hFirst : DoubleSpec first)", cleanSource,
       "SelfTest.DoubleSpec: contract has no uniqueness theorem"⟩,
     ⟨"specification imports the implementation",
       "import ProjectNameAudit.Finding\n\n" ++ cleanSpec, cleanSource,
@@ -433,10 +442,29 @@ def selfTestCase (allowInitializers : BaseIO Unit) (index : Nat) : IO UInt32 := 
     IO.eprintln s!"no self-test case {index}"
     pure 2
 
+/-- Runs the `source` check, in a child process, on a project whose only module has an `#eval`
+that ends the process with a success code. The check passes only if it parses the module without
+running it, and so reports the `#eval`. -/
+def sourceProbe : IO (Array Finding) := do
+  let directory : FilePath ← IO.FS.createTempDir
+  try
+    IO.FS.createDirAll (directory / "ProjectName")
+    IO.FS.writeFile (directory / "ProjectName" / "Probe.lean")
+      "#eval (IO.Process.exit 0 : IO Unit)\n"
+    let output : IO.Process.Output ← IO.Process.output
+      { cmd := (← IO.appPath).toString, args := #["source"], cwd := some directory }
+    if output.exitCode == 1 && (output.stderr.splitOn "banned keyword `#eval`").length > 1 then
+      pure #[]
+    else
+      pure #[⟨"self-test source probe", s!"`source` exited with {output.exitCode} without " ++
+        "reporting the `#eval`, so it ran the module before checking it"⟩]
+  finally
+    IO.FS.removeDirAll directory
+
 /-- Runs every case in a child process of this executable and reports each one whose findings
-do not match its expectation. -/
+do not match its expectation, then runs the source probe. -/
 def selfTest : IO (Array Finding) := do
-  let mut failures : Array Finding := #[]
+  let mut failures : Array Finding ← sourceProbe
   for (testCase, index) in selfTestCases.zipIdx do
     let output : IO.Process.Output ← IO.Process.output
       { cmd := (← IO.appPath).toString, args := #["self-test-case", toString index] }

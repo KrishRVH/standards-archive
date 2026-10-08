@@ -161,12 +161,14 @@ tools; `julia:install` fails on a stale manifest, Runic owns formatting, and
 The Lean task file holds the catalog's strictest bar. It pins Lean 4.34.1 by
 release digest, plus rust and nanoda; Lake dependencies (Batteries, Plausible,
 lean4export, lean4lean) are pinned to commits and Lake's caches are disabled.
-`lean:lint` runs a Lean audit that fails closed on escape hatches,
-non-constructive axioms, missing specs or docs, and untyped binders;
-`lean:kernel` re-checks every declaration in leanchecker, lean4lean, and
-nanoda; and `lean:reproduce` rebuilds offline and requires byte-identical
-outputs. The gate takes about 5 minutes warm, the first build clones about
-900 MB of dependencies, and the reproducibility step requires Linux.
+`lean:build` parses every owned file against the source rules, such as escape
+hatches and untyped binders, before compiling it; `lean:lint` runs a Lean audit
+that fails closed on non-constructive axioms, definitions without a contract,
+and missing docs; `lean:kernel` re-checks every declaration in leanchecker,
+lean4lean, and nanoda; and `lean:reproduce` rebuilds offline and requires
+byte-identical outputs. The gate takes about 5 minutes warm, the first build
+clones about 900 MB of dependencies, and the reproducibility step requires
+Linux.
 
 The Mojo task file pins the official `mojo` PyPI wheel through mise's `pypi`
 backend, which locks the compiler, formatter, and debugger wheel graph by

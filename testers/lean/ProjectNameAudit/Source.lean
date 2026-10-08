@@ -22,8 +22,8 @@ open Lean System
 remedy its findings state. `bannedAtomRemedy?` also bans every `#` command, every `builtin_` and
 `register_` command, and `unsafe` outside the audit tool. -/
 def bannedAtoms : List (String × List String) :=
-  [("finish the proof", ["sorry", "admit"]),
-    -- Bypasses the kernel or hides code from it.
+  [ -- Bypasses the kernel or hides code from it.
+    ("finish the proof", ["sorry", "admit"]),
     ("use `decide` or another proof the kernel checks", ["native_decide", "bv_decide", "bv_check"]),
     ("state it as a theorem and prove it", ["axiom"]),
     ("write a total definition that recurses structurally or proves termination with " ++
@@ -164,11 +164,12 @@ def textFindings (path : FilePath) (text : String) : Array Finding := Id.run do
     if line.contains '\t' then
       findings := findings.push ⟨at_, "tab character; indent with spaces"⟩
     if line.endsWith " " then
-      findings := findings.push ⟨at_, "trailing whitespace"⟩
+      findings := findings.push ⟨at_, "trailing whitespace; delete it"⟩
     if line.any (fun (char : Char) => invisibleChars.contains char) then
-      findings := findings.push ⟨at_, "invisible or bidirectional control character"⟩
+      findings := findings.push
+        ⟨at_, "invisible or bidirectional control character; delete it, or escape it in a string"⟩
     if line.length > maxLineLength then
-      findings := findings.push ⟨at_, s!"line longer than {maxLineLength} characters"⟩
+      findings := findings.push ⟨at_, s!"line longer than {maxLineLength} characters; wrap it"⟩
   if !text.endsWith "\n" || text.endsWith "\n\n" then
     findings := findings.push ⟨s!"{path}", "file must end with exactly one newline"⟩
   pure findings
@@ -402,11 +403,8 @@ def dependencyImports : IO (Array Name) := do
   let mut modules : Array Name := #[]
   for path in ← sourceFiles do
     if (roleOf (moduleOf path)).isSome then
-      let inputCtx : Parser.InputContext :=
-        Parser.mkInputContext (← IO.FS.readFile path) path.toString
-      let (header, _, _) ← Parser.parseHeader inputCtx
-      for imported in Elab.HeaderSyntax.imports header (includeInit := false) do
-        if (roleOf imported.module).isNone && !modules.contains imported.module then
+      for imported in (← parseFileHeader path (← IO.FS.readFile path)).key.1 do
+        if !modules.contains imported.module then
           let inToolchain : Bool ←
             try pure ((← findOLean imported.module).toString.startsWith toolchain)
             catch _ => pure false
