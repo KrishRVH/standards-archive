@@ -1,7 +1,8 @@
 #!/usr/bin/env sh
 # Lean gate steps that orchestrate external programs. Lean-level rules live in
-# the ProjectNameAudit lint driver; this script runs the build, the import
-# check, the independent kernels, and the reproducibility check.
+# the ProjectNameAudit lint driver; this script runs the source audit and the
+# build, the import check, the independent kernels, and the reproducibility
+# check.
 set -eu
 
 kernel_roots="ProjectName ProjectNameMain ProjectNameTests"
@@ -48,6 +49,20 @@ CONFIG
 
 case "${1:-}" in
   build)
+    # Parse every owned file before compiling the library, executable, or tests, so no banned
+    # command, such as an `#eval` that exits early, runs before the rule that bans it. Parsing
+    # needs only the audit and the dependency modules that owned files import.
+    lake build --iofail project_name_audit
+    imports="$(lake exe project_name_audit dependency-imports)"
+    modules=""
+    for module in $imports; do
+      modules="$modules +$module"
+    done
+    if [ -n "$modules" ]; then
+      # shellcheck disable=SC2086 # one argument per module
+      lake build --iofail $modules
+    fi
+    lake exe project_name_audit source
     # shellcheck disable=SC2086 # one argument per target
     lake build --iofail $targets
     ;;

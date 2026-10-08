@@ -3,7 +3,7 @@ import Lean
 /-!
 # Audit findings
 
-A finding is one policy violation with the place it was found.
+A finding is one policy violation with the place it was found and how to fix it.
 -/
 
 namespace ProjectNameAudit
@@ -12,7 +12,7 @@ namespace ProjectNameAudit
 structure Finding where
   /-- Where the violation is: a file and line, a declaration, or a manifest entry. -/
   location : String
-  /-- What is wrong, phrased as the rule it breaks. -/
+  /-- What is wrong, phrased as the rule it breaks, then how to fix it. -/
   message : String
 
 /-- Renders a finding as `location: message`. -/

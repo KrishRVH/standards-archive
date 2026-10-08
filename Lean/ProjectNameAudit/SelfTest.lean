@@ -4,44 +4,85 @@ import ProjectNameAudit.Source
 /-!
 # Audit self-test
 
-Proves every audit rule fires. Each case is a small library module that breaks
-one rule; the audit must report a finding containing the expected text. A clean
-control case must produce no finding at all, so the rules also prove they do
-not fire on compliant code. Cases are elaborated in memory, so the self-test
-needs no build output.
+Proves every audit rule fires. Each case is a small specification module and a
+library module that imports it, and together they break one rule; the audit
+must report a finding containing the expected text. Control cases must produce
+no finding at all, so the rules also prove they do not fire on compliant code.
+Each case runs in its own process, since every import of a module in one
+process keeps another copy of it in memory, and writes its specification module
+to a temporary directory, so the self-test needs no build output of its own.
 -/
 
 namespace ProjectNameAudit
 
 open Lean System
 
-/-- A source that must produce a finding containing `expected`, or none when `expected` is
-empty. -/
+/-- A pair of sources that must produce a finding containing `expected`, or none when
+`expected` is empty. -/
 structure SelfTestCase where
   /-- What the case breaks. -/
   name : String
-  /-- The complete module source. -/
+  /-- The complete source of the specification module, `ProjectName.Spec.SelfTest`. -/
+  spec : String
+  /-- The complete source of the library module, `ProjectName.SelfTest`. -/
   source : String
-  /-- Text the findings must contain; empty for the clean control. -/
+  /-- Text the findings must contain; empty for a control. -/
   expected : String
-
-/-- A compliant declaration with its specification, reused by cases that break one thing. -/
-def cleanSource : String :=
-  "/-! Clean. -/\n\nnamespace SelfTest\n\n/-- Doubles. -/\ndef double (count : Nat) : Nat :=\n" ++
-    "  count + count\n\n/-- `double` adds a count to itself. -/\n" ++
-    "theorem double_eq (count : Nat) : double count = count + count := by\n  rfl\n\n" ++
-    "end SelfTest\n"
 
 /-- Joins source lines, each ending in a newline. -/
 def lines (parts : List String) : String :=
   String.join (parts.map (fun (part : String) => part ++ "\n"))
 
-/-- Inserts a declaration into the clean source, before its namespace closes. -/
-def withDecl (decl : String) : String :=
-  cleanSource.replace "end SelfTest\n" (decl ++ "\nend SelfTest\n")
+/-- A compliant contract with its uniqueness theorem, reused by cases that break the library. -/
+def cleanSpec : String :=
+  lines
+    ["/-! Clean specification. -/",
+     "",
+     "namespace SelfTest",
+     "",
+     "/-- `double` adds a count to itself. -/",
+     "def DoubleSpec (double : Nat → Nat) : Prop :=",
+     "  ∀ (count : Nat), double count = count + count",
+     "",
+     "/-- At most one function meets `DoubleSpec`. -/",
+     "theorem DoubleSpec.unique (first : Nat → Nat) (second : Nat → Nat)",
+     "    (hFirst : DoubleSpec first) (hSecond : DoubleSpec second) : first = second := by",
+     "  funext (count : Nat)",
+     "  exact (hFirst count).trans (hSecond count).symm",
+     "",
+     "end SelfTest"]
 
-/-- Every self-test case. -/
-def selfTestCases : List SelfTestCase :=
+/-- A compliant definition that meets its contract through a `where` helper, which needs no
+contract of its own, reused by cases that break one thing. -/
+def cleanSource : String :=
+  lines
+    ["import ProjectName.Spec.SelfTest",
+     "",
+     "/-! Clean. -/",
+     "",
+     "namespace SelfTest",
+     "",
+     "/-- Doubles. -/",
+     "def double (count : Nat) : Nat :=",
+     "  sum count count",
+     "where",
+     "  /-- Adds two counts. -/",
+     "  sum (count : Nat) (other : Nat) : Nat :=",
+     "    count + other",
+     "",
+     "/-- `double` meets its contract. -/",
+     "theorem double_spec : DoubleSpec double := by",
+     "  intro (count : Nat)",
+     "  rfl",
+     "",
+     "end SelfTest"]
+
+/-- Inserts a declaration into a clean source, before its namespace closes. -/
+def withDecl (decl : String) (source : String := cleanSource) : String :=
+  source.replace "end SelfTest\n" (decl ++ "\nend SelfTest\n")
+
+/-- Cases that break only the library module, as name, source, and expected text. -/
+def libraryCases : List (String × String × String) :=
   [⟨"clean control", cleanSource, ""⟩,
     ⟨"sorry", withDecl (lines
         ["/-- Unproved. -/",
@@ -75,11 +116,7 @@ def selfTestCases : List SelfTestCase :=
     ⟨"partial", withDecl (lines
         ["/-- Loops. -/",
          "partial def spin (count : Nat) : Nat :=",
-         "  spin count",
-         "",
-         "/-- Spec. -/",
-         "theorem spin_eq (count : Nat) : spin count = spin count := by",
-         "  rfl"]),
+         "  spin count"]),
       "declares an opaque constant"⟩,
     ⟨"unsafe", withDecl (lines
         ["/-- Unsafe. -/",
@@ -95,39 +132,23 @@ def selfTestCases : List SelfTestCase :=
         ["/-- Replaced. -/",
          "@[implemented_by double]",
          "def slow (count : Nat) : Nat :=",
-         "  2 * count",
-         "",
-         "/-- Spec. -/",
-         "theorem slow_eq (count : Nat) : slow count = 2 * count := by",
-         "  rfl"]),
+         "  2 * count"]),
       "has its code replaced"⟩,
     ⟨"extern", withDecl (lines
         ["/-- External. -/",
          "@[extern \"c_double\"]",
          "def external (count : Nat) : Nat :=",
-         "  count",
-         "",
-         "/-- Spec. -/",
-         "theorem external_eq (count : Nat) : external count = count := by",
-         "  rfl"]),
+         "  count"]),
       "has an external implementation"⟩,
-    ⟨"well-founded recursion", withDecl (lines
-        ["/-- Halves. -/",
-         "def halvings (count : Nat) : Nat :=",
-         "  if h : count = 0 then 0 else halvings (count / 2) + 1",
-         "termination_by count",
-         "decreasing_by omega",
-         "",
-         "/-- Spec. -/",
-         "theorem halvings_zero : halvings 0 = 0 := by",
-         "  unfold halvings",
-         "  rfl"]),
-      "uses well-founded recursion"⟩,
-    ⟨"missing spec", withDecl (lines
+    ⟨"missing contract", withDecl (lines
         ["/-- Triples. -/",
          "def triple (count : Nat) : Nat :=",
-         "  count * 3"]),
-      "no owned theorem states anything about it"⟩,
+         "  count * 3",
+         "",
+         "/-- A statement that mentions `triple` but says nothing about it. -/",
+         "theorem triple_self : triple 1 = triple 1 := by",
+         "  rfl"]),
+      "SelfTest.triple: meets no contract"⟩,
     ⟨"missing theorem docstring", withDecl (lines
         ["theorem double_zero : double 0 = 0 := by",
          "  rfl"]), "has no docstring"⟩,
@@ -155,11 +176,7 @@ def selfTestCases : List SelfTestCase :=
         ["/-- Quadruples. -/",
          "def quadruple (count : Nat) : Nat :=",
          "  let twice := double count",
-         "  double twice",
-         "",
-         "/-- Spec. -/",
-         "theorem quadruple_eq (count : Nat) : quadruple count = double (double count) := by",
-         "  rfl"]),
+         "  double twice"]),
       "let or have without a type"⟩,
     ⟨"untyped intro", withDecl (lines
         ["/-- Spec. -/",
@@ -170,11 +187,7 @@ def selfTestCases : List SelfTestCase :=
     ⟨"missing result type", withDecl (lines
         ["/-- Quadruples. -/",
          "def quadruple (count : Nat) :=",
-         "  double (double count)",
-         "",
-         "/-- Spec. -/",
-         "theorem quadruple_eq (count : Nat) : quadruple count = double (double count) := by",
-         "  rfl"]),
+         "  double (double count)"]),
       "definition without a result type"⟩,
     ⟨"set_option", withDecl (lines
         ["set_option maxHeartbeats 400000 in",
@@ -186,14 +199,13 @@ def selfTestCases : List SelfTestCase :=
         ["#eval double 2"]), "banned keyword `#eval`"⟩,
     ⟨"# command", withDecl (lines
         ["#version"]), "banned keyword `#version`"⟩,
+    ⟨"private definition control", withDecl (lines
+        ["/-- Triples, for use inside this module only. -/",
+         "private def triple (count : Nat) : Nat :=",
+         "  count * 3"]), ""⟩,
     ⟨"array literal control", withDecl (lines
-        ["/-- Pairs. -/",
-         "def pair : Array Nat :=",
-         "  #[1, 2]",
-         "",
-         "/-- Spec. -/",
-         "theorem pair_eq : pair = #[1, 2] := by",
-         "  rfl"]), ""⟩,
+        ["example : (#[1, 2] : Array Nat).size = 2 := by",
+         "  decide"]), ""⟩,
     ⟨"run_tac", withDecl (lines
         ["/-- Spec. -/",
          "theorem double_zero : double 0 = 0 := by",
@@ -224,11 +236,7 @@ def selfTestCases : List SelfTestCase :=
         ["/-- Exported. -/",
          "@[export project_double]",
          "def exported (count : Nat) : Nat :=",
-         "  count",
-         "",
-         "/-- Spec. -/",
-         "theorem exported_eq (count : Nat) : exported count = count := by",
-         "  rfl"]),
+         "  count"]),
       "banned attribute `export`"⟩,
     ⟨"init", withDecl (lines
         ["/-- Startup. -/",
@@ -270,7 +278,7 @@ def selfTestCases : List SelfTestCase :=
       "banned attribute `nolint`"⟩,
     ⟨"trailing whitespace", cleanSource.replace "namespace SelfTest\n" "namespace SelfTest \n",
       "trailing whitespace"⟩,
-    ⟨"tab", cleanSource.replace "  count + count\n" "\tcount + count\n", "tab character"⟩,
+    ⟨"tab", cleanSource.replace "  count + other\n" "\tcount + other\n", "tab character"⟩,
     ⟨"carriage return", cleanSource.replace "namespace SelfTest\n" "namespace SelfTest\r\n",
       "carriage return"⟩,
     ⟨"bidirectional control", cleanSource.replace "/-- Doubles. -/"
@@ -280,34 +288,168 @@ def selfTestCases : List SelfTestCase :=
       ("/-- " ++ "".pushn 'x' 100 ++ " -/"), "line longer than"⟩,
     ⟨"final newline", cleanSource ++ "\n", "file must end with exactly one newline"⟩]
 
-/-- Every finding the audit reports for one case's source, as a library module. -/
-def caseFindings (allowInitializers : BaseIO Unit) (source : String) : IO (Array Finding) := do
-  let path : FilePath := "ProjectName" / "SelfTest.lean"
-  let elaborated : Elaborated ← elaborateFile allowInitializers path source `ProjectName.SelfTest
-  let fileMap : FileMap := source.toFileMap
-  let mut findings : Array Finding := textFindings path source
-  for command in elaborated.commands do
-    for stx in command.topDown do
-      for message in nodeMessages .library stx do
-        let line : Nat := match stx.getPos? with
-          | some pos => (fileMap.toPosition pos).line
-          | none => 0
-        findings := findings.push ⟨s!"{path}:{line}", message⟩
-  let owned : Array OwnedDecl := ownedDecls elaborated.env
-  pure (findings ++ (← declarationFindings elaborated.env owned))
+/-- A contract and uniqueness theorem for `triple`, inserted into the clean specification. -/
+def tripleSpec : String :=
+  withDecl (lines
+    ["/-- `triple` adds a count to itself twice. -/",
+     "def TripleSpec (triple : Nat → Nat) : Prop :=",
+     "  ∀ (count : Nat), triple count = count + count + count",
+     "",
+     "/-- At most one function meets `TripleSpec`. -/",
+     "theorem TripleSpec.unique (first : Nat → Nat) (second : Nat → Nat)",
+     "    (hFirst : TripleSpec first) (hSecond : TripleSpec second) : first = second := by",
+     "  funext (count : Nat)",
+     "  exact (hFirst count).trans (hSecond count).symm"]) cleanSpec
 
-/-- Runs every case and reports each one whose findings do not match its expectation. -/
-def selfTest (allowInitializers : BaseIO Unit) : IO (Array Finding) := do
+/-- Cases that need their own specification module. -/
+def specCases : List SelfTestCase :=
+  [⟨"hypothesis in a contract theorem", tripleSpec, withDecl (lines
+      ["/-- Triples. -/",
+       "def triple (count : Nat) : Nat :=",
+       "  count * 3",
+       "",
+       "/-- Meets the contract only under an impossible hypothesis. -/",
+       "theorem triple_spec (impossible : False) : TripleSpec triple :=",
+       "  impossible.elim"]),
+      "SelfTest.triple: meets no contract"⟩,
+    ⟨"contract outside a specification module", cleanSpec, withDecl (lines
+      ["/-- Triples. -/",
+       "def triple (count : Nat) : Nat :=",
+       "  count * 3",
+       "",
+       "/-- A contract the library states for itself. -/",
+       "def TripleSpec (triple : Nat → Nat) : Prop :=",
+       "  triple 0 = 0",
+       "",
+       "/-- `triple` meets its own contract. -/",
+       "theorem triple_spec : TripleSpec triple := by",
+       "  rfl"]),
+      "SelfTest.triple: meets no contract"⟩,
+    ⟨"weak uniqueness theorem", cleanSpec.replace "(hFirst : DoubleSpec first)"
+        "(same : first 0 = second 0) (hFirst : DoubleSpec first)", cleanSource,
+      "SelfTest.DoubleSpec: contract has no uniqueness theorem"⟩,
+    ⟨"specification imports the implementation",
+      "import ProjectNameAudit.Finding\n\n" ++ cleanSpec, cleanSource,
+      "imports ProjectNameAudit.Finding"⟩,
+    ⟨"well-founded recursion control", withDecl (lines
+      ["/-- `countdown` always reaches zero. -/",
+       "def CountdownSpec (countdown : Nat → Nat) : Prop :=",
+       "  ∀ (count : Nat), countdown count = 0",
+       "",
+       "/-- At most one function meets `CountdownSpec`. -/",
+       "theorem CountdownSpec.unique (first : Nat → Nat) (second : Nat → Nat)",
+       "    (hFirst : CountdownSpec first) (hSecond : CountdownSpec second) :",
+       "    first = second := by",
+       "  funext (count : Nat)",
+       "  exact (hFirst count).trans (hSecond count).symm"]) cleanSpec, withDecl (lines
+      ["/-- Counts down to zero. -/",
+       "def countdown (count : Nat) : Nat :=",
+       "  if count = 0 then 0 else countdown (count - 1)",
+       "termination_by count",
+       "decreasing_by omega",
+       "",
+       "/-- `countdown` meets its contract. -/",
+       "theorem countdown_spec : CountdownSpec countdown := by",
+       "  intro (count : Nat)",
+       "  induction count with",
+       "  | zero =>",
+       "    rw [countdown]",
+       "    rfl",
+       "  | succ previous ih =>",
+       "    rw [countdown]",
+       "    simp only [Nat.add_one_ne_zero, if_false, Nat.add_sub_cancel]",
+       "    exact ih"]),
+      ""⟩]
+
+/-- Every self-test case. -/
+def selfTestCases : List SelfTestCase :=
+  libraryCases.map (fun (entry : String × String × String) =>
+    ⟨entry.1, cleanSpec, entry.2.1, entry.2.2⟩) ++ specCases
+
+/-- The result of elaborating one file: its messages and the environment it produced. -/
+structure Elaborated where
+  /-- Every message elaboration logged. -/
+  messages : MessageLog
+  /-- The environment after the last command. -/
+  env : Environment
+
+/-- Elaborates one file as module `module`. `allowInitializers` must re-enable initializer
+execution: each import consumes it. -/
+def elaborateFile (allowInitializers : BaseIO Unit) (path : FilePath) (text : String)
+    (module : Name) : IO Elaborated := do
+  allowInitializers
+  let inputCtx : Parser.InputContext := Parser.mkInputContext text path.toString
+  let (header, parserState, messages) ← Parser.parseHeader inputCtx
+  let (env, messages) ←
+    Elab.processHeader header {} messages inputCtx (trustLevel := 1024) (mainModule := module)
+  let state : Elab.Frontend.State ←
+    Elab.IO.processCommands inputCtx parserState (Elab.Command.mkState env messages {})
+  pure (Elaborated.mk state.commandState.messages state.commandState.env)
+
+/-- Findings for the errors elaboration logged, so a control that fails to elaborate fails. -/
+def elaborationFindings (path : FilePath) (elaborated : Elaborated) : IO (Array Finding) := do
+  let mut findings : Array Finding := #[]
+  for message in elaborated.messages.toList do
+    if message.severity == .error then
+      findings := findings.push
+        ⟨s!"{path}:{message.pos.line}", s!"does not elaborate: {← message.data.toString}"⟩
+  pure findings
+
+/-- Every finding the audit reports for one case: the text and syntax rules on both modules,
+and the environment rules on the library module. Both modules are written to a temporary
+directory, where the library module imports the specification module's `.olean`. -/
+def caseFindings (allowInitializers : BaseIO Unit) (testCase : SelfTestCase) :
+    IO (Array Finding) := do
+  let directory : FilePath ← IO.FS.createTempDir
+  try
+    let specPath : FilePath := directory / "ProjectName" / "Spec" / "SelfTest.lean"
+    let path : FilePath := directory / "ProjectName" / "SelfTest.lean"
+    IO.FS.createDirAll (directory / "ProjectName" / "Spec")
+    IO.FS.writeFile specPath testCase.spec
+    IO.FS.writeFile path testCase.source
+    let mut findings : Array Finding :=
+      textFindings specPath testCase.spec ++ textFindings path testCase.source
+    findings := findings ++ (← syntaxAudit allowInitializers #[(specPath, .spec), (path, .library)])
+    let spec : Elaborated ←
+      elaborateFile allowInitializers specPath testCase.spec `ProjectName.Spec.SelfTest
+    findings := findings ++ (← elaborationFindings specPath spec)
+    writeModule spec.env (specPath.withExtension "olean")
+    searchPathRef.modify (fun (paths : System.SearchPath) => directory :: paths)
+    let library : Elaborated ←
+      elaborateFile allowInitializers path testCase.source `ProjectName.SelfTest
+    findings := findings ++ (← elaborationFindings path library)
+    pure (findings ++ (← declarationFindings library.env (ownedDecls library.env)))
+  finally
+    IO.FS.removeDirAll directory
+
+/-- Runs the case at `index` and prints every finding it produces. -/
+def selfTestCase (allowInitializers : BaseIO Unit) (index : Nat) : IO UInt32 := do
+  match selfTestCases[index]? with
+  | some testCase =>
+    (← caseFindings allowInitializers testCase).forM (fun (finding : Finding) =>
+      IO.println finding.render)
+    pure 0
+  | none =>
+    IO.eprintln s!"no self-test case {index}"
+    pure 2
+
+/-- Runs every case in a child process of this executable and reports each one whose findings
+do not match its expectation. -/
+def selfTest : IO (Array Finding) := do
   let mut failures : Array Finding := #[]
-  for testCase in selfTestCases do
-    let found : Array Finding ← caseFindings allowInitializers testCase.source
-    let rendered : Array String := found.map Finding.render
+  for (testCase, index) in selfTestCases.zipIdx do
+    let output : IO.Process.Output ← IO.Process.output
+      { cmd := (← IO.appPath).toString, args := #["self-test-case", toString index] }
+    let found : String := output.stdout
     let location : String := s!"self-test {testCase.name}"
-    if testCase.expected.isEmpty then
-      for line in rendered do
-        failures := failures.push ⟨location, s!"control case reported {line}"⟩
-    else if !rendered.any (fun (line : String) => (line.splitOn testCase.expected).length > 1)
-    then
+    if output.exitCode != 0 then
+      failures := failures.push
+        ⟨location, s!"case exited with {output.exitCode}: {output.stderr.trimAscii}"⟩
+    else if testCase.expected.isEmpty then
+      for line in found.splitOn "\n" do
+        if !line.isEmpty then
+          failures := failures.push ⟨location, s!"control case reported {line}"⟩
+    else if (found.splitOn testCase.expected).length == 1 then
       failures := failures.push ⟨location, s!"expected a finding with `{testCase.expected}`"⟩
   pure failures
 

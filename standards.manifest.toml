@@ -218,6 +218,7 @@ task_fragment = "20-lean.toml"
 mirror = [
   "ProjectName.lean",
   "ProjectName/Counter.lean",
+  "ProjectName/Spec/Counter.lean",
   "ProjectNameAudit.lean",
   "ProjectNameAudit/Environment.lean",
   "ProjectNameAudit/Finding.lean",

@@ -21,7 +21,7 @@ rust = "1.94.0"
 "cargo:https://github.com/ammkrn/nanoda_lib" = "rev:3a2407216ee84a75f9e1aead6803d0578be06ae7"
 
 [tasks."lean:build"]
-description = "Build every Lean target with warnings as errors"
+description = "Check Lean source rules, then build every target with warnings as errors"
 run = "scripts/check.sh build"
 
 [tasks."lean:fmt"]
@@ -36,7 +36,7 @@ run = "lake exe project_name_audit format"
 
 # The checks below share Lake's build directory, so they run in turn.
 [tasks."lean:lint"]
-description = "Run the Lean audit: pins, source rules, axioms, specs, docs, linters, IR"
+description = "Run the Lean audit: pins, axioms, contracts, docs, linters, IR"
 depends = ["lean:build"]
 wait_for = ["lean:fmt:check"]
 run = ["lake lint", "scripts/check.sh shake"]

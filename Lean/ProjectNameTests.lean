@@ -6,7 +6,7 @@ import ProjectName.Counter
 /-!
 # ProjectName tests
 
-The proofs in `ProjectName.Counter` cover the kernel's view of every
+The contracts in `ProjectName.Spec.Counter` cover the kernel's view of every
 definition. The `decide` examples check concrete cases in the kernel at build
 time. `main` runs the same cases and seeded Plausible properties against the
 native binary, where compiler and runtime bugs would show.

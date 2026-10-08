@@ -10,17 +10,18 @@ every proof. The best starting points are the official
 This is the catalog's strictest profile. It goes further than the SPARK
 profile on every axis the toolchain allows: SPARK proves the absence of
 run-time errors and declared contracts with automatic provers; this profile
-requires a complete functional specification for every definition, proved in
-the kernel, rechecked by three independent kernels, and confined to a
-constructive axiom base. Where a guard is impossible, the section below says
-why and shows the evidence.
+requires every public definition to meet a contract that fixes its behavior
+completely, proved in the kernel, rechecked by three independent kernels, and
+confined to a constructive axiom base. Where a guard is impossible, the section
+below says why and shows the evidence.
 
 ## Why Lean Is Here
 
-- Specifications are theorems. A statement such as
-  `advanceAll limit count steps = min limit (count + steps.sum)` is checked by
-  the kernel, not sampled by a test. Tests then check the compiled code, which
-  the kernel never sees.
+- Specifications are theorems. A contract such as `AdvanceAllSpec`, which says
+  `advanceAll limit count steps = min limit (count + steps.sum)`, is proved by
+  the kernel, not sampled by a test, and a second theorem proves that only one
+  function can meet it. Tests then check the compiled code, which the kernel
+  never sees.
 - The trusted base is small and replaceable. The kernel's output is a
   declaration list other checkers can replay. `leanchecker` replays it in the
   reference kernel, [nanoda](https://github.com/ammkrn/nanoda_lib) in an
@@ -45,6 +46,12 @@ The layout follows Lake's conventions:
 - `ProjectName.lean` and `ProjectName/`: the library. Every module uses the
   module system, and the root imports them all. The audit fails on any owned
   module that the audited roots do not import.
+- `ProjectName/Spec/`: the specifications. Each library definition meets a
+  contract stated here, and a specification module may not import the library,
+  so no contract can restate the implementation. These modules are the
+  project's requirements: the audit proves the library meets them, and that
+  each one fixes its function's behavior, but only review shows they say the
+  right thing.
 - `ProjectNameMain.lean`: the executable. Its root is not named `Main`:
   lean4export ships a `Main` module, and a dependency module of the same name
   would shadow it. The audit rejects any owned module that resolves outside the
@@ -78,10 +85,11 @@ clones the pinned Lake dependencies. After that the gate needs no network, and
 
 ## Guards
 
-Every guard below runs in `lean:standards:check`. The audit's `self-test`
-check, which `lean:lint` runs first, elaborates a module that breaks each
-source and environment rule and fails unless the rule reports it, and fails if
-any rule fires on a compliant control module.
+Every guard below runs in `lean:standards:check`, and every finding says how
+to fix it. The audit's `self-test` check, which `lean:lint` runs first,
+elaborates a specification module and a library module that break each source
+and environment rule, each case in its own process, and fails unless the rule
+reports it, and fails if any rule fires on a compliant control.
 
 Toolchain and dependencies:
 
@@ -111,14 +119,18 @@ Compilation:
 - Library, executable, and test modules use the module system, and
   `lake shake` must find no unused or missing imports in them.
 
-Source rules, from the audit's `source` check on the elaborated syntax:
+Source rules, from the audit's `source` check, which `lean:build` runs before
+it compiles any owned module. The check parses each file without elaborating
+it, with the syntax of the file's dependency imports, so a banned command, such
+as an `#eval` that ends the process with a success code, cannot run before the
+rule that bans it, in the build or in the audit:
 
 - Banned keywords: `sorry`, `admit`, `native_decide`, `decide +native`,
   `bv_decide`, and the other kernel bypasses; `set_option` and
   `unlock_limits` (options belong in `lakefile.toml`, so no proof can raise
   `maxHeartbeats` or set `debug.skipKernelTC`); `axiom`, `opaque`, `partial`,
-  `unsafe` (outside the audit tool, which must call Lean's importer),
-  `noncomputable`, `termination_by`, and `decreasing_by`; every `#` command;
+  `unsafe` (outside the audit tool, which must call Lean's importer), and
+  `noncomputable`; every `#` command;
   `run_cmd` and its relatives; every macro, syntax, notation, elaborator,
   simplification procedure, and initializer command, including every
   `builtin_` and `register_` command; and search tactics such as `exact?`.
@@ -146,15 +158,37 @@ Environment rules, from the audit's `environment` and `test-environment`
 checks on the compiled declarations:
 
 - No owned declaration is an axiom, opaque, unsafe, noncomputable, external,
-  or replaced by `implemented_by`, and none recurses through a well-founded
-  fixpoint: recursion is structural.
+  or replaced by `implemented_by`. Well-founded recursion is allowed: the
+  kernel checks its `termination_by` and `decreasing_by` proofs, while the
+  workaround, a fuel argument, returns a default value when the fuel runs out.
+  Such definitions are irreducible, so proofs about a definition `f` rewrite
+  with its equation lemmas, as in `rw [f]`, instead of using `decide` or `rfl`.
 - Every owned declaration depends only on `propext` and `Quot.sound`. The
   library is constructive: `Classical.choice` is allowed only by a
   per-declaration exception. The template has three, each with its reason:
   the executable's `main` parses with core `String` operations, which depend on
   `Classical.choice`, and the test runner uses Plausible, which does too.
-- Every written library and executable definition appears in the statement of
-  at least one owned theorem. `main` is the only exemption.
+- Every public library and executable definition meets a contract. A contract
+  is a `Prop`-valued definition in a specification module; its explicit
+  arguments are the implementations it constrains, and its implicit and
+  instance arguments are parameters. A library theorem such as
+  `theorem advance_spec : AdvanceSpec advance` shows a definition meets it, and
+  counts only if the contract's every explicit argument is an owned definition
+  applied to distinct variables, and the theorem has no hypotheses. Private
+  definitions, and helpers nested under a definition's name as `where` and
+  `let rec` declare them, need no contract: the contracts of the definitions
+  that use them cover them. An `@[expose]` body cannot use a private
+  definition, so exposed definitions put their helpers in `where`. Types a
+  contract mentions live in specification modules. `main` is the only
+  exemption.
+- Every contract a definition meets has a uniqueness theorem in a
+  specification module: any two implementations that meet it with the same
+  parameters are equal, as in
+  `∀ (f g : Nat → Nat → Nat → Nat), AdvanceSpec f → AdvanceSpec g → f = g`.
+  The finding states the exact theorem to prove. A contract that deliberately
+  admits several implementations, such as a sort that may order equal keys
+  either way, needs an exemption instead.
+- No specification module imports an owned module outside the specifications.
 - Every written owned declaration, theorems included, has a docstring.
 - Every Batteries environment linter runs, including those disabled by
   default, such as the ones for theorem docstrings and for explicit variables
@@ -194,10 +228,13 @@ reproducible output as a guarantee; this gate checks it.
 ## Exceptions
 
 Exceptions live in `ProjectNameAudit/Policy.lean`, keyed by module and
-declaration, each with a comment that says why. Add one only when a dependency
-outside the project forces it, as core `String` and Plausible do for the
-template. The audit rejects an exception once its declaration is gone or no
-longer needs it.
+declaration, each with a comment that says why. Add an axiom or unsafe-call
+exception only when a dependency outside the project forces it, as core
+`String` and Plausible do for the template. Contract exemptions cover
+definitions with no pure statement to prove, such as `main`, and uniqueness
+exemptions cover contracts that deliberately admit several implementations.
+The audit rejects an exception once its declaration is gone or no longer needs
+it.
 
 ## Not Included
 
@@ -212,8 +249,14 @@ profile:
   no AddressSanitizer or UndefinedBehaviorSanitizer runtime to link. Using the
   system compiler instead would leave the C compiler unpinned.
 - Coverage of compiled Lean code: no coverage tool exists for Lean's generated
-  code. Spec coverage stands in for it: every definition must be the subject of
-  a proved theorem.
+  code. Contracts stand in for it: every public definition must meet one.
+- Mutation testing: a uniqueness theorem proves that every change in a
+  definition's behavior breaks its contract, which mutation testing can only
+  sample, and mutants that keep the behavior would need exemptions.
+- A per-run token that each audit check must print to count as passing: code
+  running inside a check could read the token and print it. Instead, no owned
+  code runs before the source rules pass, so an audit check's exit code is its
+  own.
 - Banning calls into external code: every compiled program calls external
   runtime primitives. The IR of `ProjectName.advance` calls `Nat.add` and
   `Nat.decLe`, both `@[extern]`. The audit bans owned external declarations and
