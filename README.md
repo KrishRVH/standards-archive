@@ -61,6 +61,7 @@ MISE_TRUSTED_CONFIG_PATHS="$PWD/../.." mise lock --platform linux-x64
 Run the aggregate gate for changes to shared infrastructure or release checks:
 
 ```sh
+mise install --include-task-tools --monorepo
 mise run standards:check
 ```
 
@@ -68,6 +69,11 @@ It runs secret scanning and hygiene before drift, Markdown, Shell, and every
 preserved fixture gate. The root mise monorepo discovers `testers/*`; each
 fixture owns its deterministic Linux mise lockfile. The
 [tester guide](testers/README.md) explains the layout.
+
+Install first: when the root runs a fixture task, mise looks up the tools that
+the task itself declares, such as those of `cpp:msvc`, in the root lockfile, so
+the gate cannot install them from the fixture's lock. The install step reads
+each fixture's lockfile.
 
 The root GitHub workflow supports `workflow_dispatch` only. Hosted checks run
 on demand; preserving the archive creates no recurring CI obligation.

@@ -33,6 +33,7 @@ an affected gate, for example `mise run //testers/c:c:standards:check`.
 
 Refresh fixture locks with `mise lock --platform linux-x64` from their fixture
 directory and the root lock with `mise lock` from the repository root. Run
-`mise run standards:check` for shared or aggregate infrastructure changes,
-release validation, or an explicit request. It scans secrets and hygiene,
+`mise install --include-task-tools --monorepo`, then `mise run standards:check`,
+for shared or aggregate infrastructure changes, release validation, or an
+explicit request. The gate scans secrets and hygiene,
 then checks drift, Markdown, Shell, and all preserved fixtures.
