@@ -98,14 +98,15 @@ Language task files are additive. Keep only the `conf.d/20-*.toml` files that
 match the project languages; the aggregate `fmt`, `fmt:check`, `lint`, `test`,
 `standards`, and `standards:check` tasks dispatch to Bend, C, C++, Elixir,
 Fortran, GDScript, Haskell, JavaScript, Julia, Lean, Lua, Mojo, MoonBit, Odin,
-PHP, Roc, SPARK/Ada, Vx, Zero, and Zig when their project files are detected.
-Roc dispatch requires `main.roc`; Bend dispatch requires `PROOF.bend`; Zero
-dispatch requires `zero.toml`; MoonBit dispatch requires `moon.mod`; Lean
-dispatch requires `lean-toolchain` plus `lakefile.toml`; Julia dispatch requires
-`Project.toml` plus a `.jl` file under `src/`; Odin, Mojo, and Vx dispatch
-require an owned source file under `src/` or `tests/`; GDScript dispatch
-requires `project.godot` and an owned script under `src/` or `tests/`;
-JavaScript dispatch requires `package.json` plus `jsconfig.json`.
+PHP, Roc, Silk, SPARK/Ada, Vx, Zero, and Zig when their project files are
+detected. Roc dispatch requires `main.roc`; Bend dispatch requires
+`PROOF.bend`; Zero dispatch requires `zero.toml`; Silk dispatch requires
+`silk.toml`; MoonBit dispatch requires `moon.mod`; Lean dispatch requires
+`lean-toolchain` plus `lakefile.toml`; Julia dispatch requires `Project.toml`
+plus a `.jl` file under `src/`; Odin, Mojo, and Vx dispatch require an owned
+source file under `src/` or `tests/`; GDScript dispatch requires
+`project.godot` and an owned script under `src/` or `tests/`; JavaScript
+dispatch requires `package.json` plus `jsconfig.json`.
 
 Each language fragment expresses static workflow composition with native mise
 dependencies and structured task references. Shared install, restore,
@@ -183,6 +184,14 @@ bundles core for `wasm-gc` inside the pinned install. `moon fmt --check`,
 `moon check --deny-warn`, and `moon test --deny-warn` form the gate, with a
 staged `moon info` check that keeps committed `.mbti` interfaces current. The
 fixture is verified on Linux x64.
+
+The Silk task file pins an exact Silk development release through mise's
+GitHub backend and conda-forge Clang 22. `silk format --check` covers source
+and `silk.toml`. `silk:lint` fails on any compiler warning, on a documentation
+link that resolves to nothing, and on a source module that no root reaches,
+since Silk never checks such a module. `silk:test` runs every test without
+reusing earlier results, then builds and runs the documentation examples and
+fails on their warnings. The fixture is verified on Linux x64 only.
 
 The Vx task file pins the compiler release, conda-forge LLVM 22 MLIR tools,
 and z3. Native `vx-format` is checked through a staged copy, `vxc` type,

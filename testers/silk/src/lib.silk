@@ -1,0 +1,96 @@
+//! A counter that stops at a fixed limit.
+//!
+//! # When to use
+//! Use [`Counter`] to count events up to a known bound. Use [`Counter.make`] to start a count,
+//! [`Counter.increment`] to add one, and [`Counter.read`] to get the count.
+
+import silk.core.effect { Effect }
+import silk.core.result { Result }
+import silk.io.writer { Writer, WriterError }
+import silk.testing.testing { AssertionError, Testing }
+import silk.text.format { Debug, Format, Formatter }
+
+/// The counter is at its limit, so it cannot add one.
+pub struct LimitError {
+  /// The limit of the counter.
+  pub limit: u32,
+}
+
+impl Debug for LimitError {
+  /// Writes `LimitError { limit: <limit> }`.
+  effect fn debug(self: &Self, formatter: &mut Formatter) -> ()
+    ! WriterError
+    ? &mut Writer {
+    return run Format.debugFields(self, "LimitError", &mut formatter)
+  }
+}
+
+/// A count that starts at zero and cannot go past its limit.
+pub struct Counter {
+  count: u32,
+  limit: u32,
+}
+
+impl Counter {
+  /// Returns a counter at zero that counts up to `limit`.
+  pub fn make(limit: u32) -> Counter {
+    return Counter { count: 0, limit: limit }
+  }
+
+  /// Returns the current count.
+  pub fn read(self: &Self) -> u32 {
+    return self.count
+  }
+
+  /// Adds one to the count.
+  ///
+  /// # Errors
+  ///
+  /// - `LimitError` if the count is at the limit. The count does not change.
+  ///
+  /// # Examples
+  ///
+  /// ## Count to the limit
+  ///
+  /// ```silk
+  /// import project_name.lib { Counter, LimitError }
+  ///
+  /// pub effect fn main() -> i32
+  ///   ! LimitError {
+  ///   let mut counter = Counter.make(2)
+  ///   run counter.increment()
+  ///   run counter.increment()
+  ///   if counter.read() != 2 {
+  ///     return 1
+  ///   }
+  ///   return 0
+  /// }
+  /// ```
+  pub effect fn increment(self: &mut Self) -> ()
+    ! LimitError {
+    if self.count == self.limit {
+      fail LimitError { limit: self.limit }
+    }
+    self.count = self.count + 1
+  }
+}
+
+test effect fn incrementCountsUpToTheLimit() -> ()
+  ! AssertionError<'static> | LimitError {
+  let mut counter = Counter.make(2)
+  run counter.increment()
+  run counter.increment()
+  run Testing.expect(counter.read() == 2, "the count reaches the limit")
+}
+
+test effect fn incrementFailsAtTheLimit() -> ()
+  ! AssertionError<'static> {
+  let mut counter = Counter.make(0)
+  let outcome = run Effect.result(counter.increment())
+  let failedAtLimit = match move outcome {
+    Result<(), LimitError>.Success { .. } => false
+    Result<(), LimitError>.Failure { error } => error.limit == 0
+  }
+  run Testing.expect(failedAtLimit, "the increment fails with the limit")
+  run Testing.expect(counter.read() == 0, "a failed increment keeps the count")
+}

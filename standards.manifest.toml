@@ -301,6 +301,14 @@ task_prefix = "roc"
 task_fragment = "20-roc.toml"
 mirror = ["Project.roc", "main.roc", "scripts/format.sh"]
 
+[profiles.silk]
+name = "Silk"
+template = "Silk"
+tester = "testers/silk"
+task_prefix = "silk"
+task_fragment = "20-silk.toml"
+mirror = ["scripts/check.sh", "silk.toml", "src/lib.silk"]
+
 [profiles.spark]
 name = "SPARK (Ada)"
 template = "SPARK"

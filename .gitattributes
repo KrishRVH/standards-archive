@@ -69,6 +69,7 @@
 *.php text diff=php
 *.roc text
 *.rs text
+*.silk text
 *.vx text
 *.zig text
 *.zon text

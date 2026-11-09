@@ -1,8 +1,8 @@
 # Standards Archive
 
 Dormant copy-from catalog for Bend, C, C++, Elixir, Fortran, GDScript, Haskell,
-JavaScript, Julia, Lean, Lua, Mojo, MoonBit, Odin, PHP, Roc, SPARK/Ada, Vx,
-Zero, and Zig. These profiles are preserved for occasional reuse and receive
+JavaScript, Julia, Lean, Lua, Mojo, MoonBit, Odin, PHP, Roc, Silk, SPARK/Ada,
+Vx, Zero, and Zig. These profiles are preserved for occasional reuse and receive
 maintenance when needed.
 
 The actively maintained C#, Go, Kotlin, Python, Rust, Shell, TypeScript, and

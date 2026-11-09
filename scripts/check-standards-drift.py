@@ -39,6 +39,7 @@ AGGREGATE_MARKER_CASES = {
     "odin": ("src/project_name/project_name.odin",),
     "php": ("composer.json",),
     "roc": ("main.roc",),
+    "silk": ("silk.toml",),
     "spark": ("alire.toml", "src/project.ads"),
     "vx": ("src/project_name.vx",),
     "zero": ("zero.toml",),

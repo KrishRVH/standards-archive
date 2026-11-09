@@ -1,0 +1,34 @@
+# Silk emits LLVM 22 bitcode and links through Clang. With no ld.lld beside the
+# pinned Clang, links use the GNU ld from Clang's own conda prefix.
+[tools]
+"conda:clang" = "22.1.8"
+# Every Silk release is a prerelease, which mise lists only with prerelease set.
+# Keep silk.toml's silk-version equal to this pin: the silk tool runs the release
+# that silk.toml selects and fails when that release is not installed.
+"github:silk-lang/silk" = { version = "0.1.0-dev.62+9017bb26660b", prerelease = true }
+
+[tasks."silk:fmt"]
+description = "Format Silk source and silk.toml"
+run = "silk format"
+
+[tasks."silk:fmt:check"]
+description = "Check Silk source and silk.toml formatting"
+run = "silk format --check"
+
+[tasks."silk:lint"]
+description = "Check Silk source; fail on warnings, dead doc links, and unreached modules"
+run = "scripts/check.sh lint"
+
+[tasks."silk:test"]
+description = "Run Silk tests and documentation examples; fail on example warnings"
+# silk:lint writes the same package build directory.
+wait_for = ["silk:lint"]
+run = "scripts/check.sh test"
+
+[tasks."silk:standards"]
+description = "Run the Silk standards workflow with autofixes"
+depends = ["silk:fmt"]
+
+[tasks."silk:standards:check"]
+description = "Run the Silk standards CI gate"
+depends = ["silk:fmt:check", "silk:lint", "silk:test"]

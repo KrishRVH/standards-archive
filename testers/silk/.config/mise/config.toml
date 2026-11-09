@@ -1,0 +1,12 @@
+min_version = "2026.6.12"
+
+[settings]
+lockfile = true
+
+[tasks.standards]
+description = "Run the Silk tester standards workflow"
+depends = ["silk:standards"]
+
+[tasks."standards:check"]
+description = "Run the Silk tester standards CI gate"
+depends = ["silk:standards:check"]
