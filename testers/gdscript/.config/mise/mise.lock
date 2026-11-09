@@ -2,13 +2,17 @@
 
 lockfile_version = 2
 
-[[tools.godot]]
+[[tools."github:godotengine/godot"]]
 version = "4.7-stable"
-backend = "aqua:godotengine/godot"
+backend = "github:godotengine/godot"
 specifiers = ["4.7-stable"]
 
-[tools.godot."platforms.linux-x64"]
+[tools."github:godotengine/godot".options]
+asset_pattern = "Godot_v*_linux.x86_64.zip"
+
+[tools."github:godotengine/godot"."platforms.linux-x64"]
 checksum = "sha256:0b1a6c54c2c619c12e169fe9241edda4b81080b519451cec2984bf0d2c6cb73c"
+checksum_source = "mise-versions"
 url = "https://github.com/godotengine/godot/releases/download/4.7-stable/Godot_v4.7-stable_linux.x86_64.zip"
 url_api = "https://api.github.com/repos/godotengine/godot/releases/assets/451181917"
 

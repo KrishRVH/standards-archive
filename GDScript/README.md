@@ -13,8 +13,11 @@ inference remains available. Generated `.godot/` state stays out of version
 control; let Godot create `.uid` sidecars and commit them with their source
 files.
 
-mise installs both tools. The aqua Godot release exposes a `godot` executable
-through `symlink_bins`. GDToolkit comes from the `pypi:` backend: `mise lock`
+mise installs both tools. Godot comes from its GitHub release through the
+`github:` backend, which names each platform's asset and exposes the editor as
+`godot`. The fixture is verified on Linux x64; the Linux ARM64 and macOS
+patterns follow Godot's asset names. Windows is not declared, because the tasks
+need a POSIX shell. GDToolkit comes from the `pypi:` backend: `mise lock`
 records its complete dependency graph with wheel hashes in `mise.lock` and a
 sidecar under `.config/mise/locks/`, and installs it on the pinned Python.
 Graph locking needs mise 2026.9.7 or newer and uv 0.12.10 or newer. Commit

@@ -2,12 +2,24 @@
 min_version = "2026.9.7"
 
 [tools]
-# The Godot release binary carries its version in its file name; symlink_bins
-# exposes it under the aqua registry's `godot` name.
-godot = { version = "4.7-stable", symlink_bins = true }
 python = "3.14.7"
 uv = "0.12.19"
 "pypi:gdtoolkit" = "4.5.0"
+
+# Godot's release binaries carry the version in their file names, and Linux also
+# has Mono builds, so each platform names its asset and rename_exe exposes the
+# editor as `godot`. The aqua registry's `godot` cannot be locked: mise reads the
+# `v` before the version in a locked asset URL as a tag prefix, then looks for a
+# `Godot_vv...` binary that does not exist.
+[tools."github:godotengine/godot"]
+version = "4.7-stable"
+rename_exe = "godot"
+
+[tools."github:godotengine/godot".platforms]
+linux-x64 = { asset_pattern = "Godot_v*_linux.x86_64.zip" }
+linux-arm64 = { asset_pattern = "Godot_v*_linux.arm64.zip" }
+macos-x64 = { asset_pattern = "Godot_v*_macos.universal.zip" }
+macos-arm64 = { asset_pattern = "Godot_v*_macos.universal.zip" }
 
 [tasks."godot:fmt"]
 description = "Format GDScript source"
