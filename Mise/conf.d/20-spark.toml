@@ -1,5 +1,5 @@
 [tools]
-"github:alire-project/alire" = { version = "2.1.1", exe = "alr" }
+"github:alire-project/alire" = "2.1.1"
 
 [tasks."spark:install"]
 description = "Install pinned SPARK/Ada project tooling"
