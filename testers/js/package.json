@@ -5,7 +5,7 @@
 	"type": "module",
 	"packageManager": "bun@1.4.2",
 	"scripts": {
-		"audit": "bun audit --audit-level=low",
+		"audit": "bun audit --audit-level=low --ignore GHSA-fc5q-39xc-vjpf",
 		"format": "oxfmt --write .",
 		"format:check": "oxfmt --check .",
 		"knip": "knip",

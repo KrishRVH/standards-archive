@@ -39,7 +39,9 @@ mise run js:standards:check
 
 The default `standards` package script applies Oxlint fixes, then Oxfmt and its
 import organization. `standards:check` runs Oxlint, Oxfmt, `tsc` against
-`jsconfig.json`, Bun tests, `bun audit --audit-level=low`, and Knip.
+`jsconfig.json`, Bun tests, a dependency audit, and Knip. The audit exempts
+picomatch advisory GHSA-fc5q-39xc-vjpf in development tooling until a fixed
+release is available. Remove the exception when the lockfile resolves it.
 
 Do not add pnpm, Yarn, or npm fallback branches to the shared task file.
 Generate and commit `bun.lock` before relying on
