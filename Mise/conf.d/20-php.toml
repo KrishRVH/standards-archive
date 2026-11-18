@@ -1,12 +1,12 @@
 [env]
-# mise's asdf:php backend compiles PHP and adds these configure flags;
+# The asdf plugin appends these flags when compiling PHP;
 # Composer needs OpenSSL for HTTPS downloads.
 PHP_CONFIGURE_OPTIONS = "--with-openssl --with-readline --with-gettext"
 
 [tools]
 # Listed before php so this pinned Composer precedes any copy a PHP build bundles.
 "github:composer/composer" = { version = "2.10.3", asset_pattern = "composer.phar", rename_exe = "composer" }
-php = "8.5.9"
+"asdf:mise-plugins/asdf-php" = "8.5.9"
 
 [tasks."php:install"]
 description = "Install PHP dependencies"

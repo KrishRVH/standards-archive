@@ -19,6 +19,9 @@ mise run php:test
 mise run php:standards:check
 ```
 
+The mise fragment selects the asdf PHP plugin explicitly to build the pinned
+runtime with OpenSSL, readline, and gettext.
+
 mise pins Composer from its GitHub release and verifies the release checksum
 and attestation. The fragment lists it before PHP so a Composer bundled with a
 PHP build cannot shadow it. `php:install` runs `composer install`. `php:lock`

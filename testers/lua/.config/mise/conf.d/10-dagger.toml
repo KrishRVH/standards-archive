@@ -1,5 +1,5 @@
 [tools]
-dagger = "0.21.7"
+dagger = "0.21.11"
 
 [tasks."dagger:standards:check"]
 description = "Run standards:check inside Dagger"

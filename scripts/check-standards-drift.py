@@ -607,6 +607,42 @@ def check_fixture_checks_contract() -> list[str]:
     return errors
 
 
+def dagger_engine_errors(dagger_json: Path, fragment: Path) -> list[str]:
+    """A module without the pinned CLI's engineVersion runs under legacy engine compatibility."""
+    try:
+        pin = load_toml(fragment).get("tools", {}).get("dagger")
+    except (OSError, tomllib.TOMLDecodeError):
+        pin = None
+    try:
+        actual = json.loads(dagger_json.read_text(encoding="utf-8")).get("engineVersion")
+    except (OSError, ValueError, AttributeError):
+        actual = None
+    if not isinstance(pin, str) or actual != f"v{pin}":
+        return [f"{rel(dagger_json)} engineVersion {actual!r} must be 'v{pin}' to match {rel(fragment)} tools.dagger"]
+    return []
+
+
+def check_dagger_engine() -> list[str]:
+    errors = dagger_engine_errors(ROOT / "Dagger" / "dagger.json", ROOT / "Mise" / "conf.d" / "10-dagger.toml")
+
+    # Seeded proof: a missing or stale engineVersion must be reported and an agreeing one must pass.
+    with tempfile.TemporaryDirectory(prefix="standards-dagger-engine-") as temporary:
+        root = Path(temporary)
+        fragment = root / "10-dagger.toml"
+        fragment.write_text('[tools]\ndagger = "1.2.3"\n', encoding="utf-8")
+        for label, metadata, should_fail in (
+            ("agree", {"engineVersion": "v1.2.3"}, False),
+            ("stale", {"engineVersion": "v1.2.2"}, True),
+            ("missing", {}, True),
+        ):
+            dagger_json = root / f"{label}.json"
+            dagger_json.write_text(json.dumps(metadata), encoding="utf-8")
+            found = dagger_engine_errors(dagger_json, fragment)
+            if bool(found) != should_fail:
+                errors.append(f"Dagger engine rule mishandled the seeded {label} case: {found!r}")
+    return errors
+
+
 def check_fixture_config(profile_id: str, tester: Path, prefix: str, fixture_checks: list[str]) -> list[str]:
     errors: list[str] = []
     fixture_config = tester / ".config" / "mise" / "config.toml"
@@ -771,6 +807,7 @@ def check_profiles(profiles: dict[str, dict[str, object]]) -> list[str]:
     errors.extend(check_hygiene_task())
     errors.extend(check_fixture_checks_contract())
     errors.extend(check_bun_pins(profiles))
+    errors.extend(check_dagger_engine())
 
     for profile_id, profile in profiles.items():
         tester = ROOT / str(profile["tester"])

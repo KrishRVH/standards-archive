@@ -82,8 +82,8 @@ project's shared `.gitleaks.toml` secret scan, and `hygiene`. `sbom` writes a
 fresh CycloneDX JSON SBOM under `sbom/` for release and audit workflows;
 `SYFT_SOURCE_NAME` and `SYFT_SOURCE_VERSION` control its source metadata. If
 the project includes `10-dagger.toml` and the Dagger module,
-`dagger:standards:check` runs `standards:check` inside an official,
-digest-pinned `mise` Linux reference container; the
+`dagger:standards:check` runs `standards:check` in a digest-pinned
+Debian build environment; the
 [Dagger guide](../Dagger/README.md) describes its pins and source filtering.
 
 Commit the lockfile generated for the chosen config layout. With this template's
